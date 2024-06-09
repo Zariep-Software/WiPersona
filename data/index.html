@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WiPersona</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body id="body" class="body">
+	<input type="checkbox" id="togglemenu">
+	<label for="togglemenu"></label>
+
+	<div id="Avatar" class="avatar"> </div>
+
+<div class="SettingsWindow">
+<table border="1">
+	<tr>
+	<td>
+		<!--AVATAR SETTINGS-->
+		<h2>Avatar Settings</h2>
+		<h5>Due to security reason, WiPersona can't save information about
+		selected files, if you are running WiPersona
+		locally, put your pictures in "res" folder, sorry for the inconvenience.</h5>
+		<form action="#" method="post" enctype="multipart/form-data">
+			<span for="imagen">Avatar (Mute):</span>
+			<input type="file" id="AvatarMuted" name="imagen" accept="image/*">
+		</form>
+
+		<form action="#" method="post" enctype="multipart/form-data">
+			<span for="imagen">Avatar (Talking):</span>
+			<input type="file" id="AvatarSpeaking" name="imagen" accept="image/*">
+		</form>
+
+			<form action="#" method="post" enctype="multipart/form-data">
+			<span for="imagen">Avatar (Screaming):</span>
+			<input type="file" id="AvatarScreaming" name="imagen" accept="image/*">
+		</form>
+
+		Avatar at center: <input type="checkbox" id="togglecenter">
+		<div class="ifnotcenter">
+		X Position: <span id="PosX"> </span> <input type="number" id="StrPosX" min="1" max="9999"value="10"> <br>
+		Y Position: <span id="PosY"> </span> <input type="number" id="StrPosY" min="1" max="9999" value="10"> <br>
+		</div><br>
+		Avatar Size (px): <span id="AvatarSize"> </span>
+			<input type="number" id="StrAvatarSize" min="1" max="9999" value="10"> <br>
+
+		<!--BACKGROUND SETTINGS-->
+		<h2>Background Settings</h2>
+		Show background: <input type="checkbox" id="showbg"> 
+			<div class="ifshowbg">
+				<form action="#" method="post" enctype="multipart/form-data">
+					<span for="imagen">Select background: </span>
+					<input type="file" id="SelectBG" name="imagen" accept="image/*">
+				</form>
+			</div>
+
+		<!--VOICE SETTINGS-->
+		<h2>Voice Settings</h2>
+		<h5>Give mic access to completely start the program</h5>
+		<button id="RequestMicrophone">Request mic access</button>
+		<p id="Status"></p>
+		<span id="VoiceStatus">Voice Status: Silence</span>
+		<div class="ThresholdContainer">
+			<label for="Threshold">Speech Threshold: <span id="ThresholdValue">15</span></label>
+			<input type="range" id="Threshold" min="0" max="100" value="15">
+		</div>
+		<div class="ThresholdContainer">
+			<label for="ThresholdScream">Scream Threshold: <span id="ThresholdValueScream">30</span></label>
+			<input type="range" id="ThresholdScream" min="0" max="100" value="30">
+		</div>
+
+		<!--VOICE PREVIEW-->
+		<div id="VolumeLevelContainer" style="position: relative;">
+			<div id="ThresholdLine"></div>
+			<div id="ThresholdLineScream"></div>
+		</div>
+		<div id="VolumeBar">
+			<div id="VolumeLevel"></div>
+		</div>
+	</td>
+	<td class="credits">
+		<h1>WiPersona</h1>
+		<h3>v1.0</h3>
+		<h3><a href="https://github.com/ItzSelenux/" target="_blank">Created by ItzSelenux</a><h3>
+		<h3><a href="https://github.com/zariep-software/" target="_blank">Zariep software 2024</a><h3>
+		<h3><a href="https://github.com/Zariep-Software/WiPersona" target="_blank">Source code</a><h3>
+		<h3><a href="https://github.com/Zariep-Software/WiPersona/wiki" target="_blank">Online help</a><h3>
+		<div id="content">
+			<button onclick="SaveSettings()">Save config</button>
+			<button onclick="RestoreSettings()">Restore defaults</button>
+		</div>
+		<button onclick="ShareLink()">Show link to this config</button>
+		<h6 id="LinkToConfig" class="LinkToConfig"></h6>
+	</td>
+	</tr>
+</table>
+</div>
+		<script src="main.js"></script>
+</body>
+</html>
