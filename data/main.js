@@ -45,6 +45,9 @@ var Background = "url('res/background.png')";
 var AvatarSpeak = "res/speak.png";
 var AvatarSilence = "res/silence.png";
 var AvatarScream = "res/scream.png";
+var AvatarSize;
+var AvatarEffect;
+var EffectOnScream;
 
 function GetParamValue(Param, DefaultValue)
 {
@@ -58,35 +61,49 @@ if (NotParam)
 	CheckIfCookie('AvatarAtCenter', true);
 	CheckIfCookie('AvatarPosX', 0);
 	CheckIfCookie('AvatarPosY', 0);
+	CheckIfCookie('AvatarEffect', "none");
+	CheckIfCookie('EffectOnScream', false);
 	CheckIfCookie('ShowBackground', false);
 	CheckIfCookie('SpeechThreshold', 15);
 	CheckIfCookie('ScreamThreshold', 30);
 
 	// Retrieve configuration values from cookies and convert them to appropriate formats
 	var AvatarAtCenter = GetCookie("AvatarAtCenter") === 'true'; 
-	var AvatarSize = GetCookie("AvatarSize");
+		AvatarSize = GetCookie("AvatarSize");
+		AvatarEffect = GetCookie("AvatarEffect");
+		EffectOnScream = GetCookie("EffectOnScream") === 'true';
 	var AvatarPosX = GetCookie("AvatarPosX");
 	var AvatarPosY = GetCookie("AvatarPosY");
 	var ShowBackground = GetCookie("ShowBackground") === 'true';
 	var SpeechThreshold = GetCookie("SpeechThreshold");
 	var ScreamThreshold = GetCookie("ScreamThreshold");
-	// Set up initial values in the UI
+
+	// Set up initial values in the UI based on cookies
 	document.getElementById('togglecenter').checked = AvatarAtCenter || false;
-	document.getElementById('showbg').checked = ShowBackground || false;
-	document.getElementById('StrAvatarSize').value = AvatarSize || 320;
 	document.getElementById('StrPosX').value = AvatarPosX || 0;
 	document.getElementById('StrPosY').value = AvatarPosY || 0;
+	document.getElementById('StrAvatarSize').value = AvatarSize || 320;
+	document.getElementById('EffectSelect').value = AvatarEffect;
+	document.getElementById('effectonscream').checked = EffectOnScream;
+
+	document.getElementById('showbg').checked = ShowBackground || false;
+
 	document.getElementById('Threshold').value = SpeechThreshold || 15;
 	document.getElementById('ThresholdValue').textContent = SpeechThreshold || 15;
 	document.getElementById('ThresholdScream').value = ScreamThreshold || 30;
 	document.getElementById('ThresholdValueScream').textContent = ScreamThreshold || 30;
 }
-else
+else // if there is URL Parameters
 {
 	document.getElementById("content").innerHTML = '<h5> Save/Restore is not avaialable on "Config From Link" mode </h5>';
 	document.getElementById('togglecenter').checked = GetParamValue('AvatarAtCenter', false) === 'true';
 	document.getElementById('showbg').checked = GetParamValue('ShowBackground', false) === 'true';
 	document.getElementById('StrAvatarSize').value = GetParamValue('AvatarSize', 320);
+		AvatarSize = GetParamValue('AvatarSize', 320);
+	document.getElementById('EffectSelect').value = GetParamValue('AvatarEffect', "none");
+		AvatarEffect = GetParamValue('EffectSelect', "none");
+	document.getElementById('effectonscream').checked = GetParamValue('EffectOnScream', false) === 'true';
+		EffectOnScream = GetParamValue('EffectOnScream', false);
 	document.getElementById('StrPosX').value = GetParamValue('AvatarPosX', 0);
 	document.getElementById('StrPosY').value = GetParamValue('AvatarPosY', 0);
 	document.getElementById('Threshold').value = GetParamValue('SpeechThreshold', 15);
@@ -112,7 +129,9 @@ if (NotParam)
 		UpdateConfigCookies("AvatarPosY", document.getElementById('StrPosY').value);
 		UpdateConfigCookies("SpeechThreshold", document.getElementById('Threshold').value);
 		UpdateConfigCookies("ScreamThreshold", document.getElementById('ThresholdScream').value);
+		UpdateConfigCookies("AvatarEffect", document.getElementById('EffectSelect').value);
 		UpdateConfigCookies("AvatarAtCenter", document.getElementById('togglecenter').checked);
+		UpdateConfigCookies("EffectOnScream", document.getElementById('effectonscream').checked);
 		UpdateConfigCookies("ShowBackground", document.getElementById('showbg').checked);
 	}
 }
@@ -130,17 +149,19 @@ function RestoreSettings()
 			UpdateConfigCookies("AvatarPosY", 0);
 			UpdateConfigCookies("SpeechThreshold", 15);
 			UpdateConfigCookies("ScreamThreshold", 30);
-			UpdateConfigCookies("AvatarAtCenter", 1);
+			UpdateConfigCookies("AvatarAtCenter", "true");
+			UpdateConfigCookies("AvatarSize", 512);
+			UpdateConfigCookies("AvatarEffect", "none");
+			UpdateConfigCookies("EffectOnScream", "true");
 			UpdateConfigCookies("ShowBackground", 0);
 			location.reload(true); // Reload the page to apply changes
 		}
 		else
-		{
-			console.log("Restoration canceled by the user.");
-		}
+		{}
 	}
 }
 
+// Position and size listener
 document.getElementById('StrAvatarSize').addEventListener('change', function(event)
 {
 	AvatarSize=document.getElementById('StrAvatarSize').value;
@@ -156,6 +177,7 @@ document.getElementById('StrPosY').addEventListener('change', function(event)
 	document.getElementById("Avatar").style.top = document.getElementById('StrPosY').value + 'px'; 
 });
 
+// Update avatar position
 function LoadAvatarPos()
 {
 	if (document.getElementById('togglecenter').checked)
@@ -172,12 +194,14 @@ function LoadAvatarPos()
 	}
 }
 
+//"Toggle Center" listener
 document.getElementById('togglecenter').addEventListener('change', function(event)
 {
 LoadAvatarPos();
 });
 LoadAvatarPos();
 
+// Avatar file listeners
 document.getElementById('AvatarMuted').addEventListener('change', function(event)
 {
 	const input = event.target;
@@ -214,6 +238,7 @@ document.getElementById('AvatarScreaming').addEventListener('change', function(e
 	else {}
 });
 
+// Background listener
 document.getElementById('SelectBG').addEventListener('change', function(event)
 {
 	const input = event.target;
@@ -228,6 +253,16 @@ document.getElementById('SelectBG').addEventListener('change', function(event)
 		Background = `url(${FileURL})`
 	}
 	else {}
+});
+
+// Avatar Effect listener
+document.getElementById('EffectSelect').addEventListener('change', function(event)
+{
+	AvatarEffect = document.getElementById('EffectSelect').value; 
+});
+document.getElementById('effectonscream').addEventListener('change', function(event)
+{
+	EffectOnScream = document.getElementById('effectonscream').checked; 
 });
 
 // Set background
@@ -257,6 +292,8 @@ NewParam = "?" + // create very long parameter
 	"AvatarSize=" + document.getElementById('StrAvatarSize').value + "&" +
 	"AvatarPosX=" + document.getElementById('StrPosX').value + "&" +
 	"AvatarPosY=" + document.getElementById('StrPosY').value + "&" +
+	"AvatarEffect=" + document.getElementById('EffectSelect').value + "&" +
+	"EffectOnScream=" + document.getElementById('effectonscream').checked + "&" +
 	"SpeechThreshold=" + document.getElementById('ThresholdValue').textContent + "&" +
 	"ScreamThreshold=" + document.getElementById('ThresholdValueScream').textContent;
 
@@ -319,16 +356,19 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 			ThresholdLineScream.style.left = `${ThresholdSliderScream.value}%`;
 		});
 
-		// Event handler for audio processing
+		let PreviousAvatar = "";
+		let LastUpdateTime = 0;
+		const UpdateDelay = 100;
+
 		ScriptProcessor.onaudioprocess = () =>
 		{
-			// Processing audio data
+			// Audio processor
 			const Array = new Uint8Array(Analyser.frequencyBinCount);
 			Analyser.getByteFrequencyData(Array);
 			const Values = Array.reduce((a, b) => a + b, 0);
 			const Average = Values / Array.length;
 
-			// Updating UI elements based on audio input
+			// Update elements based on audio status
 			const VoiceStatus = document.getElementById('VoiceStatus');
 			const Threshold = parseInt(ThresholdSlider.value, 10);
 			const ThresholdScream = parseInt(ThresholdSliderScream.value, 10);
@@ -336,21 +376,63 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 
 			VolumeLevel.style.width = `${Average}%`;
 
-			// Determining voice status based on audio volume
+			// Audio handler
+			let NewAvatar = "";
+			let NewStatus = "";
+
 			if (Average > ThresholdScream)
 			{
-				VoiceStatus.textContent = 'Status: Screaming';
-				Avatar.innerHTML = '<img width='+AvatarSize+'px src="'+AvatarScream+'" alt="Screaming Avatar">';
+				NewStatus = 'Status: Screaming';
+				NewAvatar = "Scream";
 			}
 			else if (Average > Threshold)
 			{
-				VoiceStatus.textContent = 'Status: Speaking';
-				Avatar.innerHTML = '<img width='+AvatarSize+'px src="'+AvatarSpeak+'" alt="Speaking Avatar">';
+				NewStatus = 'Status: Speaking';
+				NewAvatar = "Speak";
 			}
-			else
+			else if (Average < Threshold)
 			{
-				VoiceStatus.textContent = 'Status: Silence';
-				Avatar.innerHTML = '<img width='+AvatarSize+'px src="'+AvatarSilence+'" alt="Silent Avatar">';
+				NewStatus = 'Status: Silence';
+				NewAvatar = "Silence";
+			}
+
+			// Get current time
+			const CurrentTime = new Date().getTime();
+			// Update voice and avatar status only if there is a real change and enough time has passed
+			if ((NewAvatar !== PreviousAvatar || VoiceStatus.textContent !== NewStatus) && (CurrentTime - LastUpdateTime > UpdateDelay))
+			{
+				VoiceStatus.textContent = NewStatus;
+
+				if (NewAvatar === "Scream")
+				{
+					if (PreviousAvatar == "Speak" && EffectOnScream == true)
+					{
+						Avatar.innerHTML = '<img class=' + AvatarEffect + ' width=' + AvatarSize + 'px src="' + AvatarScream + '" alt="Speaking Avatar">';
+					}
+					else
+					{
+						Avatar.innerHTML = '<img class="none" width=' + AvatarSize + 'px src="' + AvatarScream + '" alt="Speaking Avatar">';
+					}
+				}
+				else if (NewAvatar === "Speak")
+				{
+					if (PreviousAvatar == "Silence")
+					{
+						Avatar.innerHTML = '<img class=' + AvatarEffect + ' width=' + AvatarSize + 'px src="' + AvatarSpeak + '" alt="Speaking Avatar">';
+					}
+					else
+					{
+						Avatar.innerHTML = '<img class="none" width=' + AvatarSize + 'px src="' + AvatarSpeak + '" alt="Speaking Avatar">';
+					}
+				}
+				else if (NewAvatar === "Silence")
+				{
+					Avatar.innerHTML = '<img class="none" width=' + AvatarSize + 'px src="' + AvatarSilence + '" alt="Silent Avatar">';
+				}
+
+				// Update Time and avatar
+				PreviousAvatar = NewAvatar;
+				LastUpdateTime = CurrentTime;
 			}
 		};
 	}

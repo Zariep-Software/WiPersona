@@ -95,12 +95,71 @@ color: white;
 	left: 50%;
 	margin-right: -50%;
 	transform: translate(-50%, -50%);
-	width: 66%;
+	width: 90%;
 	background-color: #11111160;
 	border-radius: 16px;
-	overflow: hidden;
+	max-height: 90%;
+	overflow-y: auto;
 }
 
 .LinkToConfig h6 {
 	word-wrap: break-word; 
+}
+
+/*
+Effect Section
+*/
+
+.circle {
+	display: inline-block;
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	background: whiteSmoke;
+	box-shadow: 4px -40px 60px 5px rgb(26, 117, 206) inset;
+}
+
+
+.gelatine {
+	animation: gelatine 0.5s 0.5;
+}
+@keyframes gelatine {
+	from, to { transform: scale(1, 1); }
+	25% { transform: scale(0.9, 1.1); }
+	50% { transform: scale(1.1, 0.9); }
+	75% { transform: scale(0.95, 1.05); }
+}
+
+.pulse {
+	animation: pulse 0.2s 1 ;
+}
+@keyframes pulse {
+	from, to { transform: scale(1, 1); }
+	50% { transform: scale(1.2, 1.2); }
+	75% { transform: scale(1.2, 1.2); }
+}
+
+.bounce {
+	animation: bounce 0.2s;
+}
+@keyframes bounce {
+		10% { transform:translateY(0%); }
+		30% { transform:translateY(-10%); }
+		50% { transform:translateY(0%); }
+		65% { transform:translateY(-7%); }
+		77% { transform:translateY(0%); }
+		99% { transform:translateY(-3%); }
+		100% { transform:translateY(0); }
+}
+
+.swing {
+	transform-origin: top center;
+	animation: swing 0.5s;
+}
+@keyframes swing {
+	20% { transform: rotate(10deg); }
+	40% { transform: rotate(-10deg); }
+	60% { transform: rotate(5deg); }
+	80% { transform: rotate(-5deg); }
+	100% { transform: rotate(0deg); }
 }
