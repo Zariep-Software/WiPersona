@@ -1,12 +1,11 @@
 $SCRIPT_PATH = $MyInvocation.MyCommand.Definition
 
-# Detect the script directory
 $SCRIPT_DIR = 
-  if ($PSScriptRoot) {
-    $PSScriptRoot 
-  } else {
-    Split-Path -Parent (Convert-Path -LiteralPath ([System.Environment]::GetCommandLineArgs()[0]))
-  }
+	if ($PSScriptRoot) {
+		$PSScriptRoot 
+	} else {
+		Split-Path -Parent (Convert-Path -LiteralPath ([System.Environment]::GetCommandLineArgs()[0]))
+	}
 
 function Show-Usage {
 	Write-Host "Usage: $($MyInvocation.MyCommand.Name) [-s | -b | -k]"

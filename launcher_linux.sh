@@ -1,5 +1,4 @@
 #!/bin/bash
-
 yad --form \
 --title="WiPersona Linux launcher" \
 --width=300 --height=100 \

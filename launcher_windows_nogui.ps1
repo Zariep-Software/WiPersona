@@ -1,11 +1,11 @@
 $SCRIPT_PATH = $MyInvocation.MyCommand.Definition
 
 $SCRIPT_DIR =
-  if ($PSScriptRoot) {
-    $PSScriptRoot
-  } else {
-    Split-Path -Parent (Convert-Path -LiteralPath ([System.Environment]::GetCommandLineArgs()[0]))
-  }
+	if ($PSScriptRoot) {
+		$PSScriptRoot
+	} else {
+		Split-Path -Parent (Convert-Path -LiteralPath ([System.Environment]::GetCommandLineArgs()[0]))
+	}
 
 function Show-Usage {
 	Write-Host "Usage: $0 [-s | -b | -k]"
@@ -14,6 +14,7 @@ function Show-Usage {
 	Write-Host "  -k: Stop server"
 }
 
+# Get command-line arguments
 if ($args.Length -ne 1) {
 	Write-Host "ERROR: No argument provided"
 	Show-Usage
