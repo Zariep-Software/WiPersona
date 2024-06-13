@@ -12,6 +12,7 @@
 - Choose avatar picture (Mute, Talking, and Screaming)
 - Toggleable avatar at center
 - Choose avatar size (px)
+- On-speak avaatar animtions
 - Toggleable show background
 - Choose background
 - Persistent options through cookies
