@@ -2,6 +2,7 @@ body {
 text-align: center;
 color: white;
 background-color: black;
+font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 table {
@@ -17,17 +18,23 @@ color: white;
 }
 
 #Avatar {
-	top: 50%;
-	left: 50%;
-	margin-right: -50%;
-	transform: translate(-50%, -50%);
 	position: fixed;
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+#.Scream {}
+#.Speak {}
+#.Silence {}
+
+input[type="range"] {
+	width: 20%;
 }
 
 #VolumeBar {
 	width: 100%;
 	height: 30px;
-	background: linear-gradient(to right, #00800066 0%, #00800066 70%, #fffd0066 85%, #ff000066 95%);
+	background: linear-gradient(to right, #00900066 0%, #00600066 70%, #fffd0066 85%, #ff000066 95%);
 	border-radius: 5px;
 	overflow: hidden;
 }
@@ -103,63 +110,107 @@ color: white;
 }
 
 .LinkToConfig h6 {
-	word-wrap: break-word; 
+	word-wrap: break-word;
 }
 
 /*
 Effect Section
 */
 
-.circle {
-	display: inline-block;
-	width: 100px;
-	height: 100px;
-	border-radius: 50%;
-	background: whiteSmoke;
-	box-shadow: 4px -40px 60px 5px rgb(26, 117, 206) inset;
+.bounce {
+	animation: bounce 0.4s;
 }
-
+.shake {
+	animation: bounce 0.2s;
+}
+@keyframes bounce {
+	10%  { transform: translate(-50%, -50%) translateY(0%); }
+	30%  { transform:translate(-50%, -50%) translateY(-5%); }
+	50%  { transform: translate(-50%, -50%) translateY(0%); }
+	65%  { transform: translate(-50%, -50%) translateY(-5%); }
+	77%  { transform:translate(-50%, -50%) translateY(0%); }
+	99%  { transform: translate(-50%, -50%) translateY(-3%); }
+	100% { transform:translate(-50%, -50%) translateY(0%); }
+}
 
 .gelatine {
 	animation: gelatine 0.5s 0.5;
 }
 @keyframes gelatine {
-	from, to { transform: scale(1, 1); }
-	25% { transform: scale(0.9, 1.1); }
-	50% { transform: scale(1.1, 0.9); }
-	75% { transform: scale(0.95, 1.05); }
+	from, to { transform: translate(-50%, -50%) scale(1, 1); }
+	25% { transform: translate(-50%, -50%) scale(0.9, 1.1); }
+	50% { transform: translate(-50%, -50%) scale(1.1, 0.9); }
+	75% { transform: translate(-50%, -50%) scale(0.95, 1.05); }
 }
 
 .pulse {
 	animation: pulse 0.2s 1 ;
 }
 @keyframes pulse {
-	from, to { transform: scale(1, 1); }
-	50% { transform: scale(1.2, 1.2); }
-	75% { transform: scale(1.2, 1.2); }
-}
-
-.bounce {
-	animation: bounce 0.2s;
-}
-@keyframes bounce {
-		10% { transform:translateY(0%); }
-		30% { transform:translateY(-10%); }
-		50% { transform:translateY(0%); }
-		65% { transform:translateY(-7%); }
-		77% { transform:translateY(0%); }
-		99% { transform:translateY(-3%); }
-		100% { transform:translateY(0); }
+	from, to { transform: translate(-50%, -50%) scale(1, 1); }
+	50% { transform: translate(-50%, -50%) scale(1.2, 1.2); }
+	75% { transform: translate(-50%, -50%) scale(1.2, 1.2); }
 }
 
 .swing {
+	transform-origin: bottom center;
+	animation: swing 0.5s;
+}
+.swingtop {
 	transform-origin: top center;
 	animation: swing 0.5s;
 }
 @keyframes swing {
-	20% { transform: rotate(10deg); }
-	40% { transform: rotate(-10deg); }
-	60% { transform: rotate(5deg); }
-	80% { transform: rotate(-5deg); }
-	100% { transform: rotate(0deg); }
+	20% { transform: translate(-50%, -50%) rotate(10deg); }
+	40% { transform: translate(-50%, -50%) rotate(-10deg); }
+	60% { transform: translate(-50%, -50%) rotate(5deg); }
+	80% { transform: translate(-50%, -50%) rotate(-5deg); }
+	100% { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+#Avatar.Silence.bright {
+/*
+	--brightness-input: 1.5;
+	--brightness-output: 1;
+	animation: dim 0.5s forwards;
+*/
+	filter: brightness(1);
+}
+#Avatar.Speak.bright {
+/*
+	--brightness-input: 1;
+	--brightness-output: 1.5;
+	animation: dim 0.5s forwards;
+*/
+	filter: brightness(1.5);
+}
+#Avatar.Speak.bright0 {
+	filter: brightness(1.5);
+}
+#Avatar.Scream.bright {
+	filter: brightness(1.5);
+}
+#Avatar.Silence.dim {
+/*
+	--brightness-input: 1;
+	--brightness-output: 0.5;
+	animation: dim 0.5s forwards;
+*/
+	filter: brightness(0.5);
+}
+#Avatar.Speak.dim {
+/*
+	--brightness-input: 0.5;
+	--brightness-output: 1;
+	animation: dim 0.5s forwards;
+*/
+	filter: brightness(1);
+}
+@keyframes dim {
+	from {
+		filter: brightness(brightness(var(--brightness-input)));
+	}
+	to {
+		filter: brightness(var(--brightness-output));
+	}
 }

@@ -1,12 +1,18 @@
 #!/bin/bash
 SCRIPT_PATH=$(realpath "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+BUSYBOX="$SCRIPT_DIR/busybox"
+
+if [ ! -e "$BUSYBOX" ]; then
+	BUSYBOX="busybox"
+fi
+
 
 show_usage() {
-	echo "Usage: $0 [-s | -b | -k]"
+	echo "Usage: $0 [-s | -k| -b]"
 	echo "  -s: Start HTTP server"
-	echo "  -b: Open HTTP Address in browser"
 	echo "  -k: Stop server"
+	echo "  -b: Open HTTP Address in browser"
 }
 
 if [ $# -ne 1 ]; then
@@ -17,7 +23,7 @@ fi
 
 case "$1" in
 	-s)
-		$SCRIPT_DIR/busybox httpd -v -f -p 2962 -h $SCRIPT_DIR/data &
+		$BUSYBOX httpd -v -f -p 2962 -h $SCRIPT_DIR/data &
 		;;
 	-b)
 		xdg-open http://localhost:2962 &

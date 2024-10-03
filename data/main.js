@@ -41,13 +41,16 @@ function CheckIfCookie(cookieName, defaultValue)
 
 // Assigning resources to variables
 const body = document.getElementById('body');
-var Background = "url('res/background.png')";
-var AvatarSpeak = "res/speak.png";
-var AvatarSilence = "res/silence.png";
-var AvatarScream = "res/scream.png";
+import { LocalBackground, LocalAvatarSpeak, LocalAvatarSilence, LocalAvatarScream } from './res/sourcelist.js';
+var Background = LocalBackground;
+var AvatarSpeak = LocalAvatarSpeak;
+var AvatarSilence = LocalAvatarSilence;
+var AvatarScream = LocalAvatarScream;
 var AvatarSize;
 var AvatarEffect;
+var AvatarDimEffect;
 var EffectOnScream;
+var Avatar = document.getElementById('Avatar');
 
 function GetParamValue(Param, DefaultValue)
 {
@@ -57,20 +60,23 @@ function GetParamValue(Param, DefaultValue)
 if (NotParam)
 {
 	// Initialization section: Check and set default values for various configuration cookies
-	CheckIfCookie('AvatarSize', 320);
+	CheckIfCookie('AvatarSize', 512);
 	CheckIfCookie('AvatarAtCenter', true);
 	CheckIfCookie('AvatarPosX', 0);
 	CheckIfCookie('AvatarPosY', 0);
 	CheckIfCookie('AvatarEffect', "none");
+	CheckIfCookie('AvatarDimEffect', "none");
 	CheckIfCookie('EffectOnScream', false);
+	CheckIfCookie('BackgroundColor', "#000");
 	CheckIfCookie('ShowBackground', false);
 	CheckIfCookie('SpeechThreshold', 15);
 	CheckIfCookie('ScreamThreshold', 30);
 
 	// Retrieve configuration values from cookies and convert them to appropriate formats
-	var AvatarAtCenter = GetCookie("AvatarAtCenter") === 'true'; 
+	var AvatarAtCenter = GetCookie("AvatarAtCenter") === 'true';
 		AvatarSize = GetCookie("AvatarSize");
 		AvatarEffect = GetCookie("AvatarEffect");
+		AvatarDimEffect = GetCookie("AvatarDimEffect");
 		EffectOnScream = GetCookie("EffectOnScream") === 'true';
 	var AvatarPosX = GetCookie("AvatarPosX");
 	var AvatarPosY = GetCookie("AvatarPosY");
@@ -82,8 +88,9 @@ if (NotParam)
 	document.getElementById('togglecenter').checked = AvatarAtCenter || false;
 	document.getElementById('StrPosX').value = AvatarPosX || 0;
 	document.getElementById('StrPosY').value = AvatarPosY || 0;
-	document.getElementById('StrAvatarSize').value = AvatarSize || 320;
+	document.getElementById('StrAvatarSize').value = AvatarSize || 512;
 	document.getElementById('EffectSelect').value = AvatarEffect;
+	document.getElementById('DimEffectSelect').value = AvatarDimEffect;
 	document.getElementById('effectonscream').checked = EffectOnScream;
 
 	document.getElementById('showbg').checked = ShowBackground || false;
@@ -95,11 +102,15 @@ if (NotParam)
 }
 else // if there is URL Parameters
 {
-	document.getElementById("content").innerHTML = '<h5> Save/Restore is not avaialable on "Config From Link" mode </h5>';
+	document.getElementById("content").innerHTML = '<h5> Save/Restore is not available on "Config From Link" mode </h5>';
 	document.getElementById('togglecenter').checked = GetParamValue('AvatarAtCenter', false) === 'true';
+	document.getElementById('bgcolor').value = "#" + GetParamValue('BackgroundColor', "#91a555");
+		document.body.style.backgroundColor = document.getElementById('bgcolor').value;
 	document.getElementById('showbg').checked = GetParamValue('ShowBackground', false) === 'true';
 	document.getElementById('StrAvatarSize').value = GetParamValue('AvatarSize', 320);
 		AvatarSize = GetParamValue('AvatarSize', 320);
+	document.getElementById('DimEffectSelect').value = GetParamValue('AvatarDimEffect', "none");
+		AvatarDimEffect = GetParamValue('AvatarDimEffect', "none");
 	document.getElementById('EffectSelect').value = GetParamValue('AvatarEffect', "none");
 		AvatarEffect = GetParamValue('EffectSelect', "none");
 	document.getElementById('effectonscream').checked = GetParamValue('EffectOnScream', false) === 'true';
@@ -112,55 +123,6 @@ else // if there is URL Parameters
 	document.getElementById('ThresholdValueScream').textContent = GetParamValue('ScreamThreshold', 30);
 }
 
-// Function to update a specific configuration cookie
-function UpdateConfigCookies(CookieName, NewValue)
-{
-	// Set the cookie with the new value
-	document.cookie = CookieName + '=' + NewValue;
-}
-
-// Function to save current settings into cookies from UI elements
-function SaveSettings()
-{
-if (NotParam)
-	{
-		UpdateConfigCookies("AvatarSize", document.getElementById('StrAvatarSize').value);
-		UpdateConfigCookies("AvatarPosX", document.getElementById('StrPosX').value);
-		UpdateConfigCookies("AvatarPosY", document.getElementById('StrPosY').value);
-		UpdateConfigCookies("SpeechThreshold", document.getElementById('Threshold').value);
-		UpdateConfigCookies("ScreamThreshold", document.getElementById('ThresholdScream').value);
-		UpdateConfigCookies("AvatarEffect", document.getElementById('EffectSelect').value);
-		UpdateConfigCookies("AvatarAtCenter", document.getElementById('togglecenter').checked);
-		UpdateConfigCookies("EffectOnScream", document.getElementById('effectonscream').checked);
-		UpdateConfigCookies("ShowBackground", document.getElementById('showbg').checked);
-	}
-}
-
-// Function to restore default settings for all configurable items
-function RestoreSettings()
-{
-	if (NotParam)
-	{
-		if (confirm("Are you sure?"))
-		{
-			// Reset settings to their defaults and update cookies
-			UpdateConfigCookies("AvatarSize", 320);
-			UpdateConfigCookies("AvatarPosX", 0);
-			UpdateConfigCookies("AvatarPosY", 0);
-			UpdateConfigCookies("SpeechThreshold", 15);
-			UpdateConfigCookies("ScreamThreshold", 30);
-			UpdateConfigCookies("AvatarAtCenter", "true");
-			UpdateConfigCookies("AvatarSize", 512);
-			UpdateConfigCookies("AvatarEffect", "none");
-			UpdateConfigCookies("EffectOnScream", "true");
-			UpdateConfigCookies("ShowBackground", 0);
-			location.reload(true); // Reload the page to apply changes
-		}
-		else
-		{}
-	}
-}
-
 // Position and size listener
 document.getElementById('StrAvatarSize').addEventListener('change', function(event)
 {
@@ -169,12 +131,12 @@ document.getElementById('StrAvatarSize').addEventListener('change', function(eve
 
 document.getElementById('StrPosX').addEventListener('change', function(event)
 {
-	document.getElementById("Avatar").style.left = document.getElementById('StrPosX').value + 'px'; 
+	document.getElementById("Avatar").style.left = document.getElementById('StrPosX').value + 'px';
 });
 
 document.getElementById('StrPosY').addEventListener('change', function(event)
 {
-	document.getElementById("Avatar").style.top = document.getElementById('StrPosY').value + 'px'; 
+	document.getElementById("Avatar").style.top = document.getElementById('StrPosY').value + 'px';
 });
 
 // Update avatar position
@@ -184,20 +146,19 @@ function LoadAvatarPos()
 	{
 		document.getElementById("Avatar").style.top = "50%";
 		document.getElementById("Avatar").style.left = "50%";
-		document.getElementById("Avatar").style.marginRight = "-50%";
 		document.getElementById("Avatar").style.transform = "translate(-50%, -50%)";
 	}
 	else
 	{
 		document.getElementById("Avatar").style.left = document.getElementById('StrPosX').value + 'px';
-		document.getElementById("Avatar").style.top = document.getElementById('StrPosY').value + 'px'; 
+		document.getElementById("Avatar").style.top = document.getElementById('StrPosY').value + 'px';
 	}
 }
 
 //"Toggle Center" listener
 document.getElementById('togglecenter').addEventListener('change', function(event)
 {
-LoadAvatarPos();
+	LoadAvatarPos();
 });
 LoadAvatarPos();
 
@@ -239,6 +200,12 @@ document.getElementById('AvatarScreaming').addEventListener('change', function(e
 });
 
 // Background listener
+
+document.getElementById('bgcolor').addEventListener('input', function(event)
+{
+	document.body.style.backgroundColor = event.target.value;
+});
+
 document.getElementById('SelectBG').addEventListener('change', function(event)
 {
 	const input = event.target;
@@ -258,11 +225,18 @@ document.getElementById('SelectBG').addEventListener('change', function(event)
 // Avatar Effect listener
 document.getElementById('EffectSelect').addEventListener('change', function(event)
 {
-	AvatarEffect = document.getElementById('EffectSelect').value; 
+	AvatarEffect = document.getElementById('EffectSelect').value;
+});
+document.getElementById('DimEffectSelect').addEventListener('change', function(event)
+{
+	AvatarDimEffect = document.getElementById('DimEffectSelect').value;
+	Avatar.className = 'Silence';
+	console.log(AvatarDimEffect)
+	Avatar.classList.add(AvatarDimEffect);
 });
 document.getElementById('effectonscream').addEventListener('change', function(event)
 {
-	EffectOnScream = document.getElementById('effectonscream').checked; 
+	EffectOnScream = document.getElementById('effectonscream').checked;
 });
 
 // Set background
@@ -283,26 +257,6 @@ document.getElementById('showbg').addEventListener('change', function()
 		body.style.backgroundImage = "";
 	}
 });
-
-function ShareLink()
-{
-NewParam = "?" + // create very long parameter
-	"AvatarAtCenter=" + document.getElementById('togglecenter').checked + "&" +
-	"ShowBackground=" + document.getElementById('showbg').checked + "&" +
-	"AvatarSize=" + document.getElementById('StrAvatarSize').value + "&" +
-	"AvatarPosX=" + document.getElementById('StrPosX').value + "&" +
-	"AvatarPosY=" + document.getElementById('StrPosY').value + "&" +
-	"AvatarEffect=" + document.getElementById('EffectSelect').value + "&" +
-	"EffectOnScream=" + document.getElementById('effectonscream').checked + "&" +
-	"SpeechThreshold=" + document.getElementById('ThresholdValue').textContent + "&" +
-	"ScreamThreshold=" + document.getElementById('ThresholdValueScream').textContent;
-
-// Create a BoxArea and fill it with NewParam
-var ConfigLink = DomainURL+NewParam
-	document.getElementById("LinkToConfig").innerHTML = '<label for="Link:">Link:</label><br> <textarea id="newlink" name="link" rows="7" cols="25"</textarea>'
-	document.getElementById('newlink').value = ConfigLink;
-}
-
 
 document.getElementById('RequestMicrophone').addEventListener('click', async () =>
 {
@@ -403,34 +357,78 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 			{
 				VoiceStatus.textContent = NewStatus;
 
+
+				// Function to dynamically create or update a CSS rule
+				function addDynamicCSSRule(className, imageUrl)
+				{
+					const styleSheet = document.styleSheets[0]; // Get the first stylesheet
+					const rule = `.${className} { background-image: url(${imageUrl}); }`;
+
+					// If the rule already exists, remove it before adding the new one
+					for (let i = 0; i < styleSheet.cssRules.length; i++)
+					{
+						if (styleSheet.cssRules[i].selectorText === `.${className}`)
+						{
+							styleSheet.deleteRule(i);
+							break;
+						}
+					}
+
+					// Add the new rule
+					styleSheet.insertRule(rule, styleSheet.cssRules.length);
+				}
+
+				// Now dynamically inject the background-image into the CSS classes
+				addDynamicCSSRule('Scream', AvatarScream);
+				addDynamicCSSRule('Speak', AvatarSpeak);
+				addDynamicCSSRule('Silence', AvatarSilence);
+
+				// Clear all avatar state classes first
+				Avatar.classList.remove('Scream', 'Speak', 'Silence', AvatarEffect);
+
+				Avatar.style.width = AvatarSize + 'px';
+				Avatar.style.height = AvatarSize + 'px';
+
+				// Set the appropriate class based on the avatar state
 				if (NewAvatar === "Scream")
 				{
-					if (PreviousAvatar == "Speak" && EffectOnScream == true)
+					Avatar.classList.add('Scream');
+					if (EffectOnScream)
 					{
-						Avatar.innerHTML = '<img class=' + AvatarEffect + ' width=' + AvatarSize + 'px src="' + AvatarScream + '" alt="Speaking Avatar">';
+						Avatar.className = 'Scream';
+						void Avatar.offsetWidth;
+						Avatar.classList.add(AvatarEffect);
+						Avatar.classList.add(AvatarDimEffect);
 					}
 					else
 					{
-						Avatar.innerHTML = '<img class="none" width=' + AvatarSize + 'px src="' + AvatarScream + '" alt="Speaking Avatar">';
+					Avatar.classList.add(AvatarEffect);
 					}
 				}
 				else if (NewAvatar === "Speak")
 				{
-					if (PreviousAvatar == "Silence")
+					if (PreviousAvatar === "Silence")
 					{
-						Avatar.innerHTML = '<img class=' + AvatarEffect + ' width=' + AvatarSize + 'px src="' + AvatarSpeak + '" alt="Speaking Avatar">';
+						Avatar.classList.add('Speak');
+						void Avatar.offsetWidth;
+						Avatar.classList.add(AvatarEffect);
+						Avatar.classList.add(AvatarDimEffect);
 					}
-					else
+					else if (PreviousAvatar === "Scream")
 					{
-						Avatar.innerHTML = '<img class="none" width=' + AvatarSize + 'px src="' + AvatarSpeak + '" alt="Speaking Avatar">';
+						Avatar.className = 'Speak';
+						Avatar.classList.add(AvatarDimEffect+0);
 					}
 				}
 				else if (NewAvatar === "Silence")
 				{
-					Avatar.innerHTML = '<img class="none" width=' + AvatarSize + 'px src="' + AvatarSilence + '" alt="Silent Avatar">';
+					Avatar.className = 'Silence';
+					Avatar.classList.add(AvatarEffect);
+					Avatar.classList.add(AvatarDimEffect);
 				}
 
 				// Update Time and avatar
+				void Avatar.offsetWidth;
 				PreviousAvatar = NewAvatar;
 				LastUpdateTime = CurrentTime;
 			}

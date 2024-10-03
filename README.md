@@ -1,6 +1,9 @@
 # WiPersona
 
-**WiPersona is a tool that let you run a simple PNGTuber on web browser**
+**WiPersona is a tool that let you run a simple PNGTuber in a web browser**
+
+### [Try it online!](https://zariep-software.github.io/WiPersona/data/)
+
 
 ## Why? 
 
@@ -10,10 +13,18 @@
 
 ## Features
 - Choose avatar picture (Mute, Talking, and Screaming)
-- Toggleable avatar at center
+- Choose avatar position (or centered)
 - Choose avatar size (px)
-- On-speak avaatar animtions
-- Toggleable show background
-- Choose background
-- Persistent options through cookies
-- Shareable options with links
+- On-speak avatar animations
+- On-speak dim/bright
+- Choose background color/picture
+- Persistent settings through cookies
+- Shareable settings with links
+
+## How to use
+
+See [WiPersona online manual](https://github.com/Zariep-Software/WiPersona/wiki)
+
+## Changelog
+
+See [Changelog](https://github.com/Zariep-Software/WiPersona/wiki/Changelog)

@@ -9,10 +9,10 @@
 
 <body id="body" class="body">
 	<input type="checkbox" id="togglemenu">
-	<label for="togglemenu"></label>
+	<label for="togglemenu">
 
-	<div id="Avatar" class="avatar"> </div>
-
+	<div id="Avatar"> </div>
+</label>
 <div class="SettingsWindow">
 <table border="1">
 	<tr>
@@ -50,12 +50,22 @@
 			<option value="bounce">Bounce</option>
 			<option value="gelatine">Gelatine</option>
 			<option value="pulse">Pulse</option>
+			<option value="shake">Shake</option>
 			<option value="swing">Swing</option>
+			<option value="swingtop">Swing (From top)</option>
+		</select> <br>
+		Brightness effect:
+		<select name="DimEffect" id="DimEffectSelect">
+			<option value="none">None</option>
+			<option value="bright">Bright when speaking</option>
+			<option value="dim">Dim if muted</option>
 		</select> <br>
 		Effect on Talk to Scream: <input type="checkbox" id="effectonscream"> 
 		<!--BACKGROUND SETTINGS-->
 		<h2>Background Settings</h2>
-		Show background: <input type="checkbox" id="showbg"> 
+
+		Background Color: <input type="color" id="bgcolor"> <br>
+		Image background: <input type="checkbox" id="showbg">
 			<div class="ifshowbg">
 				<form action="#" method="post" enctype="multipart/form-data">
 					<span for="imagen">Select background: </span>
@@ -70,12 +80,12 @@
 		<p id="Status"></p>
 		<span id="VoiceStatus">Voice Status: Silence</span>
 		<div class="ThresholdContainer">
-			<label for="Threshold">Speech Threshold: <span id="ThresholdValue">15</span></label>
-			<input type="range" id="Threshold" min="0" max="100" value="15">
+			<label for="Threshold">Speech Threshold: </label>
+			<input type="range" id="Threshold" min="0" max="100" value="15"><span id="ThresholdValue">15</span>
 		</div>
 		<div class="ThresholdContainer">
-			<label for="ThresholdScream">Scream Threshold: <span id="ThresholdValueScream">30</span></label>
-			<input type="range" id="ThresholdScream" min="0" max="100" value="30">
+			<label for="ThresholdScream">Scream Threshold: </label>
+			<input type="range" id="ThresholdScream" min="0" max="100" value="30"> <span id="ThresholdValueScream">30</span>
 		</div>
 
 		<!--VOICE PREVIEW-->
@@ -89,11 +99,11 @@
 	</td>
 	<td class="credits">
 		<h1>WiPersona</h1>
-		<h3>v1.1</h3>
+		<h3>v1.2</h3>
 		<h3><a href="https://github.com/ItzSelenux/" target="_blank">Created by ItzSelenux</a><h3>
 		<h3><a href="https://github.com/Zariep-Software/" target="_blank">Zariep software 2024</a><h3>
 		<h3><a href="https://github.com/Zariep-Software/WiPersona" target="_blank">Source code</a><h3>
-		<h3><a href="https://github.com/Zariep-Software/WiPersona/wiki" target="_blank">Online help</a><h3>
+		<h3><a href="https://github.com/Zariep-Software/WiPersona/wiki" target="_blank">Online manual</a><h3>
 		<div id="content">
 			<button onclick="SaveSettings()">Save config</button>
 			<button onclick="RestoreSettings()">Restore defaults</button>
@@ -104,6 +114,7 @@
 	</tr>
 </table>
 </div>
-		<script src="main.js"></script>
+		<script type="module" src="main.js"></script>
+		<script src="cookiemgr.js"></script>
 </body>
 </html>
