@@ -1,0 +1,3 @@
+[submodule "data/external/SJTSW"]
+	path = data/external/SJTSW
+	url = https://github.com/ItzSelenux/SJTSW

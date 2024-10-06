@@ -17,6 +17,10 @@ a {
 color: white;
 }
 
+#VoiceStatus {
+display: none;
+}
+
 #Avatar {
 	position: fixed;
 	background-size: contain;

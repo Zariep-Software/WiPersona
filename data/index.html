@@ -5,6 +5,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>WiPersona</title>
 	<link rel="stylesheet" href="style.css">
+	<!--Using SJTSW as translation system-->
+	<script src="translations.js"></script>
+	<script src="external/SJTSW/sjtsw.js"></script>
 </head>
 
 <body id="body" class="body">
@@ -18,73 +21,73 @@
 	<tr>
 	<td>
 		<!--AVATAR SETTINGS-->
-		<h2>Avatar Settings</h2>
-		<h5>Due to security reason, WiPersona can't save information about
+		<h2 id="str-avatarsettings">Avatar Settings</h2>
+		<h5 id="str-securitywarning">Due to security reason, WiPersona can't save information about
 		selected files, if you are running WiPersona
 		locally, put your pictures in "res" folder, sorry for the inconvenience.</h5>
 		<form action="#" method="post" enctype="multipart/form-data">
-			<span for="imagen">Avatar (Mute):</span>
+			<span for="imagen" id="str-avatarmute">Avatar (Mute):</span>
 			<input type="file" id="AvatarMuted" name="imagen" accept="image/*">
 		</form>
 
 		<form action="#" method="post" enctype="multipart/form-data">
-			<span for="imagen">Avatar (Talking):</span>
+			<span for="imagen" id="str-avatartalking">Avatar (Talking):</span>
 			<input type="file" id="AvatarSpeaking" name="imagen" accept="image/*">
 		</form>
 
 			<form action="#" method="post" enctype="multipart/form-data">
-			<span for="imagen">Avatar (Screaming):</span>
+			<span for="imagen" id="str-avatarscreaming">Avatar (Screaming):</span>
 			<input type="file" id="AvatarScreaming" name="imagen" accept="image/*">
 		</form>
 
-		Avatar at center: <input type="checkbox" id="togglecenter">
+		<span id="str-avataratcenter">Avatar at center:</span> <input type="checkbox" id="togglecenter">
 		<div class="ifnotcenter">
-		X Position: <span id="PosX"> </span> <input type="number" id="StrPosX" min="1" max="9999"value="10"> <br>
-		Y Position: <span id="PosY"> </span> <input type="number" id="StrPosY" min="1" max="9999" value="10"> <br>
+		<span id="str-xposition">X Position:</span><span id="PosX"> </span> <input type="number" id="StrPosX" min="1" max="9999"value="10"> <br>
+		<span id="str-yposition">Y Position:</span><span id="PosY"> </span> <input type="number" id="StrPosY" min="1" max="9999" value="10"> <br>
 		</div><br>
-		Avatar Size (px): <span id="AvatarSize"> </span>
+		<span id="str-avatarsize">Avatar Size (px):</span> <span id="AvatarSize"> </span>
 			<input type="number" id="StrAvatarSize" min="1" max="9999" value="10"> <br>
-		In-talk effect:
+		<span id="str-intalkeffect">In-talk effect:</span>
 		<select name="Effect" id="EffectSelect">
-			<option value="none">None</option>
-			<option value="bounce">Bounce</option>
-			<option value="gelatine">Gelatine</option>
-			<option value="pulse">Pulse</option>
-			<option value="shake">Shake</option>
-			<option value="swing">Swing</option>
-			<option value="swingtop">Swing (From top)</option>
+			<option id="str-ite-none" value="none">None</option>
+			<option id="str-bounce" value="bounce">Bounce</option>
+			<option id="str-gelatine" value="gelatine">Gelatine</option>
+			<option id="str-pulse" value="pulse">Pulse</option>
+			<option id="str-shake" value="shake">Shake</option>
+			<option id="str-swing" value="swing">Swing</option>
+			<option id="str-swingtop" value="swingtop">Swing (From top)</option>
 		</select> <br>
-		Brightness effect:
+		<span id="str-brightnesseffect">Brightness effect:</span>
 		<select name="DimEffect" id="DimEffectSelect">
-			<option value="none">None</option>
-			<option value="bright">Bright when speaking</option>
-			<option value="dim">Dim if muted</option>
+			<option id="str-be-dim" value="none">None</option>
+			<option id="str-bright" value="bright">Bright when speaking</option>
+			<option id="str-dim" value="dim">Dim if muted</option>
 		</select> <br>
-		Effect on Talk to Scream: <input type="checkbox" id="effectonscream"> 
+		<span id="str-effectontalktoscream">Effect on Talk to Scream: </span> <input type="checkbox" id="effectonscream"> 
 		<!--BACKGROUND SETTINGS-->
-		<h2>Background Settings</h2>
+		<h2 id="str-backgroundsettings" >Background Settings</h2>
 
-		Background Color: <input type="color" id="bgcolor"> <br>
-		Image background: <input type="checkbox" id="showbg">
+		<span id="str-backgroundcolor" >Background Color:</span> <input type="color" id="bgcolor"> <br>
+		<span id="str-imagebackground" >Image background:</span> <input type="checkbox" id="showbg">
 			<div class="ifshowbg">
 				<form action="#" method="post" enctype="multipart/form-data">
-					<span for="imagen">Select background: </span>
+					<span id="str-selectbackground"  for="imagen">Select background: </span>
 					<input type="file" id="SelectBG" name="imagen" accept="image/*">
 				</form>
 			</div>
 
 		<!--VOICE SETTINGS-->
-		<h2>Voice Settings</h2>
-		<h5>Give mic access to completely start the program</h5>
+		<h2 id="str-voicesettings" >Voice Settings</h2>
+		<h5 id="str-micaccess" >Give mic access to completely start the program</h5>
 		<button id="RequestMicrophone">Request mic access</button>
 		<p id="Status"></p>
 		<span id="VoiceStatus">Voice Status: Silence</span>
 		<div class="ThresholdContainer">
-			<label for="Threshold">Speech Threshold: </label>
+			<label id="str-speechthreshold"  for="Threshold">Speech Threshold: </label>
 			<input type="range" id="Threshold" min="0" max="100" value="15"><span id="ThresholdValue">15</span>
 		</div>
 		<div class="ThresholdContainer">
-			<label for="ThresholdScream">Scream Threshold: </label>
+			<label id="str-screamthreshold" for="ThresholdScream">Scream Threshold: </label>
 			<input type="range" id="ThresholdScream" min="0" max="100" value="30"> <span id="ThresholdValueScream">30</span>
 		</div>
 
@@ -99,16 +102,16 @@
 	</td>
 	<td class="credits">
 		<h1>WiPersona</h1>
-		<h3>v1.2</h3>
-		<h3><a href="https://github.com/ItzSelenux/" target="_blank">Created by ItzSelenux</a><h3>
-		<h3><a href="https://github.com/Zariep-Software/" target="_blank">Zariep software 2024</a><h3>
-		<h3><a href="https://github.com/Zariep-Software/WiPersona" target="_blank">Source code</a><h3>
-		<h3><a href="https://github.com/Zariep-Software/WiPersona/wiki" target="_blank">Online manual</a><h3>
+		<h3>v1.21</h3>
+		<h3 id="str-createdbyitzselenux"><a href="https://github.com/ItzSelenux/" target="_blank">Created by ItzSelenux</a><h3>
+		<h3 id="str-zariepsoftware"><a href="https://github.com/Zariep-Software/" target="_blank">Zariep software 2024</a><h3>
+		<h3 id="str-sourcecode"><a href="https://github.com/Zariep-Software/WiPersona" target="_blank">Source code</a><h3>
+		<h3 id="str-onlinemanual"><a href="https://github.com/Zariep-Software/WiPersona/wiki" target="_blank">Online manual</a><h3>
 		<div id="content">
-			<button onclick="SaveSettings()">Save config</button>
-			<button onclick="RestoreSettings()">Restore defaults</button>
+			<button id="str-saveconfig" onclick="SaveSettings()">Save config</button>
+			<button id="str-restoredefaults" onclick="RestoreSettings()">Restore defaults</button>
 		</div>
-		<button onclick="ShareLink()">Show link to this config</button>
+		<button id="str-showlinktothisconfig"  onclick="ShareLink()">Show link to this config</button>
 		<h6 id="LinkToConfig" class="LinkToConfig"></h6>
 	</td>
 	</tr>
@@ -116,5 +119,6 @@
 </div>
 		<script type="module" src="main.js"></script>
 		<script src="cookiemgr.js"></script>
+		<script>SJTSW_TranslatePage();</script> 
 </body>
 </html>

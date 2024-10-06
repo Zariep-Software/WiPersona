@@ -3,10 +3,7 @@ SCRIPT_PATH=$(realpath "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
 BUSYBOX="$SCRIPT_DIR/busybox"
 
-if [ ! -e "$BUSYBOX" ]; then
-	BUSYBOX="busybox"
-fi
-
+[ ! -e "$BUSYBOX" ] && BUSYBOX="busybox"
 
 show_usage() {
 	echo "Usage: $0 [-s | -k| -b]"

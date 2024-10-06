@@ -1,6 +1,6 @@
 Add-Type -AssemblyName System.Windows.Forms
 
-$exePath = [System.IO.Path]::Combine($scriptPath, "launcher_windows_nogui.exe")
+$exePath = [System.IO.Path]::Combine($scriptPath, "windows_bin", "launcher_windows_nogui.exe")
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "WiPersona Windows Launcher"
