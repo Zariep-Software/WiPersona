@@ -22,9 +22,6 @@
 	<td>
 		<!--AVATAR SETTINGS-->
 		<h2 id="str-avatarsettings">Avatar Settings</h2>
-		<h5 id="str-securitywarning">Due to security reason, WiPersona can't save information about
-		selected files, if you are running WiPersona
-		locally, put your pictures in "res" folder, sorry for the inconvenience.</h5>
 		<form action="#" method="post" enctype="multipart/form-data">
 			<span for="imagen" id="str-avatarmute">Avatar (Mute):</span>
 			<input type="file" id="AvatarMuted" name="imagen" accept="image/*">
@@ -46,7 +43,7 @@
 		<span id="str-yposition">Y Position:</span><span id="PosY"> </span> <input type="number" id="StrPosY" min="1" max="9999" value="10"> <br>
 		</div><br>
 		<span id="str-avatarsize">Avatar Size (px):</span> <span id="AvatarSize"> </span>
-			<input type="number" id="StrAvatarSize" min="1" max="9999" value="10"> <br>
+			<input type="number" id="StrAvatarSize" min="1" max="9999" value="512"> <br>
 		<span id="str-intalkeffect">In-talk effect:</span>
 		<select name="Effect" id="EffectSelect">
 			<option id="str-ite-none" value="none">None</option>
@@ -102,9 +99,8 @@
 	</td>
 	<td class="credits">
 		<h1>WiPersona</h1>
-		<h3>v1.21</h3>
-		<h3 id="str-createdbyitzselenux"><a href="https://github.com/ItzSelenux/" target="_blank">Created by ItzSelenux</a><h3>
-		<h3 id="str-zariepsoftware"><a href="https://github.com/Zariep-Software/" target="_blank">Zariep software 2024</a><h3>
+		<h3>v1.22</h3>
+		<h3 id="str-zariepsoftware"><a href="https://github.com/Zariep-Software/" target="_blank">Zariep software 2025</a><h3>
 		<h3 id="str-sourcecode"><a href="https://github.com/Zariep-Software/WiPersona" target="_blank">Source code</a><h3>
 		<h3 id="str-onlinemanual"><a href="https://github.com/Zariep-Software/WiPersona/wiki" target="_blank">Online manual</a><h3>
 		<div id="content">
@@ -118,7 +114,7 @@
 </table>
 </div>
 		<script type="module" src="main.js"></script>
-		<script src="cookiemgr.js"></script>
+		<script src="config.js"></script>
 		<script>SJTSW_TranslatePage();</script> 
 </body>
 </html>

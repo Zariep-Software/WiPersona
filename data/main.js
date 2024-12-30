@@ -6,121 +6,101 @@ var NotParam;
 NotParam = (UrlObj.search === "");
 const searchParams = new URLSearchParams(UrlObj.search);
 
-// Function to retrieve the value of a specific cookie by its name
-function GetCookie(name)
+// Retrieve a setting from IndexedDB
+function GetSetting(key, defaultValue)
 {
-	// Split document.cookie string into individual "key=value" pairs
-	let CookieArr = document.cookie.split(";");
-	for (let i = 0; i < CookieArr.length; i++)
+	return new Promise((resolve, reject) =>
 	{
-		// Split each pair into key and value
-		let CookiePair = CookieArr[i].split("=");
-		// Trim whitespace from the key and check if it matches the requested cookie name
-		if (name == CookiePair[0].trim())
+		OpenSettingsDB().then(db =>
 		{
-			// If found, decode the cookie value and return it
-			return decodeURIComponent(CookiePair[1]);
-		}
-	}
-	// Return null if no matching cookie is found
-	return null;
+			const transaction = db.transaction('settings', 'readonly');
+			const store = transaction.objectStore('settings');
+			const request = store.get(key);
+
+			request.onsuccess = function (event)
+			{
+				if (event.target.result)
+				{
+					resolve(event.target.result.value);
+				}
+				else
+				{
+					resolve(defaultValue);
+				}
+			};
+
+			request.onerror = function (event)
+			{
+				reject(event.target.error);
+			};
+		}).catch(error => reject('Error opening DB:', error));
+	});
 }
 
-// Function to check for a cookie's existence and set a default value if not found
-function CheckIfCookie(cookieName, defaultValue)
+// Load settings from IndexedDB and initialize UI
+function LoadSettings()
 {
-	// Retrieve cookie value using GetCookie function
-	var cookieValue = GetCookie(cookieName);
-	if (!cookieValue)
+	Promise.all([
+		GetSetting('AvatarSize', 512),
+		GetSetting('AvatarAtCenter', true),
+		GetSetting('AvatarPosX', 0),
+		GetSetting('AvatarPosY', 0),
+		GetSetting('AvatarEffect', 'none'),
+		GetSetting('AvatarDimEffect', 'none'),
+		GetSetting('EffectOnScream', false),
+		GetSetting('BackgroundColor', '#000000'),
+		GetSetting('ShowBackground', false),
+		GetSetting('SpeechThreshold', 15),
+		GetSetting('ScreamThreshold', 30)
+	]).then(([avatarSize, avatarAtCenter, avatarPosX, avatarPosY, avatarEffect, avatarDimEffect, effectOnScream, backgroundColor, showBackground, speechThreshold, screamThreshold]) =>
 	{
-		// If the cookie is not found, log the creation message and create the cookie with a default value
-		console.log(cookieName + " Cookie not found, creating a new cookie");
-		document.cookie = cookieName + '=' + defaultValue;
-	}
+		// Update UI elements
+		document.getElementById('togglecenter').checked = avatarAtCenter;
+		document.getElementById('StrAvatarSize').value = avatarSize;
+		document.getElementById('StrPosX').value = avatarPosX;
+		document.getElementById('StrPosY').value = avatarPosY;
+		document.getElementById('EffectSelect').value = avatarEffect;
+		document.getElementById('DimEffectSelect').value = avatarDimEffect;
+		document.getElementById('effectonscream').checked = effectOnScream;
+		document.getElementById('bgcolor').value = backgroundColor;
+		document.getElementById('showbg').checked = showBackground;
+		document.getElementById('Threshold').value = speechThreshold;
+		document.getElementById('ThresholdValue').textContent = speechThreshold;
+		document.getElementById('ThresholdScream').value = screamThreshold;
+		document.getElementById('ThresholdValueScream').textContent = screamThreshold;
+
+				Avatar.style.width = avatarSize + 'px';
+				Avatar.style.height = avatarSize + 'px';
+
+		ShowBackground = showBackground;
+		AvatarEffect = avatarEffect;
+		AvatarDimEffect = avatarDimEffect;
+
+		// Apply settings
+		document.body.style.backgroundColor = backgroundColor;
+		LoadAvatarPos();
+	}).catch(error => console.error('Error loading settings:', error));
 }
 
 // Assigning resources to variables
 const body = document.getElementById('body');
 import { LocalBackground, LocalAvatarSpeak, LocalAvatarSilence, LocalAvatarScream } from './res/sourcelist.js';
-var Background = LocalBackground;
-var AvatarSpeak = LocalAvatarSpeak;
-var AvatarSilence = LocalAvatarSilence;
-var AvatarScream = LocalAvatarScream;
+var Background;
+var AvatarSpeak;
+var AvatarSilence;
+var AvatarScream;
 var AvatarSize;
 var AvatarEffect;
 var AvatarDimEffect;
 var EffectOnScream;
+var ShowBackground;
 var Avatar = document.getElementById('Avatar');
+
+var MicActive
 
 function GetParamValue(Param, DefaultValue)
 {
 	return searchParams.has(Param) ? searchParams.get(Param) : DefaultValue;
-}
-
-if (NotParam)
-{
-	// Initialization section: Check and set default values for various configuration cookies
-	CheckIfCookie('AvatarSize', 512);
-	CheckIfCookie('AvatarAtCenter', true);
-	CheckIfCookie('AvatarPosX', 0);
-	CheckIfCookie('AvatarPosY', 0);
-	CheckIfCookie('AvatarEffect', "none");
-	CheckIfCookie('AvatarDimEffect', "none");
-	CheckIfCookie('EffectOnScream', false);
-	CheckIfCookie('BackgroundColor', "#000");
-	CheckIfCookie('ShowBackground', false);
-	CheckIfCookie('SpeechThreshold', 15);
-	CheckIfCookie('ScreamThreshold', 30);
-
-	// Retrieve configuration values from cookies and convert them to appropriate formats
-	var AvatarAtCenter = GetCookie("AvatarAtCenter") === 'true';
-		AvatarSize = GetCookie("AvatarSize");
-		AvatarEffect = GetCookie("AvatarEffect");
-		AvatarDimEffect = GetCookie("AvatarDimEffect");
-		EffectOnScream = GetCookie("EffectOnScream") === 'true';
-	var AvatarPosX = GetCookie("AvatarPosX");
-	var AvatarPosY = GetCookie("AvatarPosY");
-	var ShowBackground = GetCookie("ShowBackground") === 'true';
-	var SpeechThreshold = GetCookie("SpeechThreshold");
-	var ScreamThreshold = GetCookie("ScreamThreshold");
-
-	// Set up initial values in the UI based on cookies
-	document.getElementById('togglecenter').checked = AvatarAtCenter || false;
-	document.getElementById('StrPosX').value = AvatarPosX || 0;
-	document.getElementById('StrPosY').value = AvatarPosY || 0;
-	document.getElementById('StrAvatarSize').value = AvatarSize || 512;
-	document.getElementById('EffectSelect').value = AvatarEffect;
-	document.getElementById('DimEffectSelect').value = AvatarDimEffect;
-	document.getElementById('effectonscream').checked = EffectOnScream;
-
-	document.getElementById('showbg').checked = ShowBackground || false;
-
-	document.getElementById('Threshold').value = SpeechThreshold || 15;
-	document.getElementById('ThresholdValue').textContent = SpeechThreshold || 15;
-	document.getElementById('ThresholdScream').value = ScreamThreshold || 30;
-	document.getElementById('ThresholdValueScream').textContent = ScreamThreshold || 30;
-}
-else // if there is URL Parameters
-{
-	document.getElementById("content").innerHTML = '<h5> Save/Restore is not available on "Config From Link" mode </h5>';
-	document.getElementById('togglecenter').checked = GetParamValue('AvatarAtCenter', false) === 'true';
-	document.getElementById('bgcolor').value = "#" + GetParamValue('BackgroundColor', "#91a555");
-		document.body.style.backgroundColor = document.getElementById('bgcolor').value;
-	document.getElementById('showbg').checked = GetParamValue('ShowBackground', false) === 'true';
-	document.getElementById('StrAvatarSize').value = GetParamValue('AvatarSize', 320);
-		AvatarSize = GetParamValue('AvatarSize', 320);
-	document.getElementById('DimEffectSelect').value = GetParamValue('AvatarDimEffect', "none");
-		AvatarDimEffect = GetParamValue('AvatarDimEffect', "none");
-	document.getElementById('EffectSelect').value = GetParamValue('AvatarEffect', "none");
-		AvatarEffect = GetParamValue('EffectSelect', "none");
-	document.getElementById('effectonscream').checked = GetParamValue('EffectOnScream', false) === 'true';
-		EffectOnScream = GetParamValue('EffectOnScream', false);
-	document.getElementById('StrPosX').value = GetParamValue('AvatarPosX', 0);
-	document.getElementById('StrPosY').value = GetParamValue('AvatarPosY', 0);
-	document.getElementById('Threshold').value = GetParamValue('SpeechThreshold', 15);
-	document.getElementById('ThresholdValue').textContent = GetParamValue('SpeechThreshold', 15);
-	document.getElementById('ThresholdScream').value = GetParamValue('ScreamThreshold', 30);
-	document.getElementById('ThresholdValueScream').textContent = GetParamValue('ScreamThreshold', 30);
 }
 
 // Position and size listener
@@ -162,64 +142,227 @@ document.getElementById('togglecenter').addEventListener('change', function(even
 });
 LoadAvatarPos();
 
+// Constants for IndexedDB
+const DB_NAME = 'WiPersona';
+const ASSETS_STORE_NAME = 'assets';
+const SETTINGS_STORE_NAME = 'settings';
+let db;
+
+// Open or create the consolidated IndexedDB database
+function OpenDB()
+{
+	return new Promise((resolve, reject) =>
+	{
+		const request = indexedDB.open(DB_NAME, 1);
+
+		request.onupgradeneeded = function (event)
+		{
+			db = event.target.result;
+
+			// Create stores if they doesn't exist
+			if (!db.objectStoreNames.contains(ASSETS_STORE_NAME))
+			{
+				db.createObjectStore(ASSETS_STORE_NAME, { keyPath: 'id' });
+			}
+			if (!db.objectStoreNames.contains(SETTINGS_STORE_NAME))
+			{
+				db.createObjectStore(SETTINGS_STORE_NAME, { keyPath: 'key' });
+			}
+		};
+
+		request.onsuccess = function (event)
+		{
+			db = event.target.result;
+			resolve(db);
+		};
+
+		request.onerror = function (event)
+		{
+			reject(event.target.error);
+		};
+	});
+}
+
+// Convert image file to base64
+function ConvertFileToBase64(file)
+{
+	return new Promise((resolve, reject) =>
+	{
+		const reader = new FileReader();
+		reader.onloadend = function ()
+		{
+			resolve(reader.result);
+		};
+		reader.onerror = function ()
+		{
+			reject("Error converting file to base64");
+		};
+		reader.readAsDataURL(file);
+	});
+}
+
+// Save the base64 image to IndexedDB
+function SaveImageToDB(base64Data, key)
+{
+	OpenDB().then((db) =>
+	{
+		const transaction = db.transaction(ASSETS_STORE_NAME, 'readwrite');
+		const store = transaction.objectStore(ASSETS_STORE_NAME);
+
+		store.put({ id: key, data: base64Data });
+
+		transaction.oncomplete = function ()
+		{
+			console.log(`${key} saved successfully`);
+		};
+
+		transaction.onerror = function (event)
+		{
+			console.error('Error saving image:', event.target.error);
+		};
+	}).catch((error) =>
+	{
+		console.error('Error opening DB:', error);
+	});
+}
+
+// Retrieve a specific image by key from IndexedDB
+function GetImageFromDB(key)
+{
+	return new Promise((resolve, reject) =>
+	{
+		OpenDB().then((db) =>
+		{
+			const transaction = db.transaction(ASSETS_STORE_NAME, 'readonly');
+			const store = transaction.objectStore(ASSETS_STORE_NAME);
+
+			const request = store.get(key); // Get the image by key
+
+			request.onsuccess = function (event)
+			{
+				resolve(event.target.result ? event.target.result.data : null); // Return the base64 data
+			};
+
+			request.onerror = function (event)
+			{
+				reject(event.target.error);
+			};
+		}).catch((error) =>
+		{
+			reject('Error opening DB:', error);
+		});
+	});
+}
+
+// Function to load the images when the web starts
+function LoadAvatarImages()
+{
+	// Load the images from IndexedDB and store them in the variables
+	Promise.all([
+		GetImageFromDB('AvatarSpeak'),
+		GetImageFromDB('AvatarSilence'),
+		GetImageFromDB('AvatarScream'),
+		GetImageFromDB('Background')
+	]).then(([speak, silence, scream, background]) =>
+	{
+		AvatarSpeak = speak || LocalAvatarSpeak;
+		AvatarSilence = silence || LocalAvatarSilence;
+		AvatarScream = scream || LocalAvatarScream;
+		Background = background || LocalBackground;
+
+	if (ShowBackground === true)
+	{
+		document.body.style.backgroundImage = `url(${Background})`;
+		document.body.style.backgroundRepeat = "no-repeat";
+		document.body.style.backgroundSize = "cover";
+		document.body.style.backgroundAttachment = "fixed";
+	}
+
+	}).catch((error) =>
+	{
+		console.error('Error loading avatar images:', error);
+	});
+}
+
 // Avatar file listeners
-document.getElementById('AvatarMuted').addEventListener('change', function(event)
+document.getElementById('AvatarMuted').addEventListener('change', function (event)
 {
 	const input = event.target;
 	if (input.files.length > 0)
 	{
 		const file = input.files[0];
-		const FileURL = URL.createObjectURL(file);
-		AvatarSilence = FileURL;
+		ConvertFileToBase64(file).then((base64Data) =>
+		{
+			AvatarSilence = base64Data;
+			SaveImageToDB(base64Data, 'AvatarSilence');
+		}).catch((error) =>
+		{
+			console.error('Error converting AvatarMuted file:', error);
+		});
 	}
-	else {}
 });
 
-document.getElementById('AvatarSpeaking').addEventListener('change', function(event)
+document.getElementById('AvatarSpeaking').addEventListener('change', function (event)
 {
 	const input = event.target;
 	if (input.files.length > 0)
 	{
 		const file = input.files[0];
-		const FileURL = URL.createObjectURL(file);
-		AvatarSpeak = FileURL;
+		ConvertFileToBase64(file).then((base64Data) =>
+		{
+			AvatarSpeak = base64Data;
+			SaveImageToDB(base64Data, 'AvatarSpeak');
+		}).catch((error) =>
+		{
+			console.error('Error converting AvatarSpeak file:', error);
+		});
 	}
-	else {}
 });
 
-document.getElementById('AvatarScreaming').addEventListener('change', function(event)
+document.getElementById('AvatarScreaming').addEventListener('change', function (event)
 {
 	const input = event.target;
 	if (input.files.length > 0)
 	{
 		const file = input.files[0];
-		const FileURL = URL.createObjectURL(file);
-		AvatarScream = FileURL;
+		ConvertFileToBase64(file).then((base64Data) =>
+		{
+			AvatarScream = base64Data;
+			SaveImageToDB(base64Data, 'AvatarScream');
+		}).catch((error) =>
+		{
+			console.error('Error converting AvatarScreaming file:', error);
+		});
 	}
-	else {}
+});
+
+// Background image listener
+document.getElementById('SelectBG').addEventListener('change', function (event)
+{
+	const input = event.target;
+	if (input.files.length > 0)
+	{
+		const file = input.files[0];
+		ConvertFileToBase64(file).then((base64Data) =>
+		{
+			Background = base64Data;
+			SaveImageToDB(base64Data, 'Background');
+
+			document.body.style.backgroundImage = `url(${base64Data})`;
+			document.body.style.backgroundRepeat = "no-repeat";
+			document.body.style.backgroundSize = "cover";
+			document.body.style.backgroundAttachment = "fixed";
+		}).catch((error) =>
+		{
+			console.error('Error converting background file:', error);
+		});
+	}
 });
 
 // Background listener
-
 document.getElementById('bgcolor').addEventListener('input', function(event)
 {
 	document.body.style.backgroundColor = event.target.value;
-});
-
-document.getElementById('SelectBG').addEventListener('change', function(event)
-{
-	const input = event.target;
-	if (input.files.length > 0)
-	{
-		const file = input.files[0];
-		const FileURL = URL.createObjectURL(file);
-		document.body.style.backgroundImage = `url(${FileURL})`
-		document.body.style.backgroundSize = "cover"
-		document.body.style.backgroundRepeat = "no-repeat"
-
-		Background = `url(${FileURL})`
-	}
-	else {}
 });
 
 // Avatar Effect listener
@@ -239,18 +382,15 @@ document.getElementById('effectonscream').addEventListener('change', function(ev
 	EffectOnScream = document.getElementById('effectonscream').checked;
 });
 
-// Set background
-if (document.getElementById('showbg').checked)
-{
-	body.style.backgroundImage = Background;
-}
-
 // Change background when show "background" button is clicked
 document.getElementById('showbg').addEventListener('change', function()
 {
 	if (this.checked)
 	{
-		body.style.backgroundImage = Background;
+		body.style.backgroundImage = `url(${Background})`;
+		document.body.style.backgroundRepeat = "no-repeat";
+		document.body.style.backgroundSize = "cover";
+		document.body.style.backgroundAttachment = "fixed";
 	}
 	else
 	{
@@ -258,10 +398,27 @@ document.getElementById('showbg').addEventListener('change', function()
 	}
 });
 
+window.addEventListener('load', function ()
+{
+	LoadAvatarImages();
+	LoadSettings();
+});
+
 document.getElementById('RequestMicrophone').addEventListener('click', async () =>
 {
 	try
 	{
+		if (!MicActive)
+		{
+			MicActive = 1;
+			document.getElementById('RequestMicrophone').style.display = "None";
+			document.getElementById('str-micaccess').style.display = "None";
+		}
+		else
+		{
+			return;
+		}
+
 		// Requesting access to the user's microphone
 		const Stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 		// Updating the status text to indicate permission granted and microphone active
@@ -356,7 +513,6 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 			if ((NewAvatar !== PreviousAvatar || VoiceStatus.textContent !== NewStatus) && (CurrentTime - LastUpdateTime > UpdateDelay))
 			{
 				VoiceStatus.textContent = NewStatus;
-
 
 				// Function to dynamically create or update a CSS rule
 				function addDynamicCSSRule(className, imageUrl)

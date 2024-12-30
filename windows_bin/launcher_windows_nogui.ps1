@@ -1,5 +1,7 @@
 $SCRIPT_PATH = $MyInvocation.MyCommand.Definition
 
+$DataPath = Resolve-Path "$SCRIPT_DIR\..\data"
+
 $SCRIPT_DIR =
 	if ($PSScriptRoot) {
 		$PSScriptRoot
@@ -23,7 +25,7 @@ if ($args.Length -ne 1) {
 
 switch ($args[0]) {
 	"-s" {
-		Start-Process -FilePath "$SCRIPT_DIR\busybox.exe" -ArgumentList "httpd -v -f -p 2962 -h $SCRIPT_DIR\data" -NoNewWindow
+		Start-Process -FilePath "$SCRIPT_DIR\busybox.exe" -ArgumentList "httpd -v -f -p 2962 -h $DataPath" -NoNewWindow
 	}
 	"-b" {
 		Start-Process "http://localhost:2962"

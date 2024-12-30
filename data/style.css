@@ -9,6 +9,10 @@ table {
 width: 100%;
 }
 
+.credits {
+width: 20%;
+}
+
 .credits td {
 text-align: right;
 }

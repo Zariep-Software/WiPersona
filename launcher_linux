@@ -1,12 +1,12 @@
 #!/bin/bash
+
 SCRIPT_PATH=$(realpath "$0")
-SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+SCRIPT_DIR=$(dirname "$SCRIPT_PATH")/linux_bin
 
 yad --form \
---title="WiPersona Linux launcher" \
+--title="WiPersona Linux Launcher" \
 --width=300 --height=100 \
---field="":LBL "" \
---field="Start server":BTN "$SCRIPT_DIR/launcher_linux_nogui.sh -s" \
---field="Stop server":BTN "$SCRIPT_DIR/launcher_linux_nogui.sh -k" \
---field="Open browser":BTN "$SCRIPT_DIR/launcher_linux_nogui.sh -b" \
---button="Exit"
+--field="Start server:BTN" "bash -c '$SCRIPT_DIR/launcher_linux_nogui -s'" \
+--field="Stop server:BTN" "bash -c '$SCRIPT_DIR/launcher_linux_nogui -k'" \
+--field="Open browser:BTN" "bash -c '$SCRIPT_DIR/launcher_linux_nogui -b'" \
+--button="Exit:1"

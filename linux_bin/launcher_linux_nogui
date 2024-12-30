@@ -20,7 +20,7 @@ fi
 
 case "$1" in
 	-s)
-		$BUSYBOX httpd -v -f -p 2962 -h $SCRIPT_DIR/data &
+		$BUSYBOX httpd -v -f -p 2962 -h $SCRIPT_DIR/../data &
 		;;
 	-b)
 		xdg-open http://localhost:2962 &
