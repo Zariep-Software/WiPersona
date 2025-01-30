@@ -1,0 +1,3 @@
+ps2exe ..\launcher_windows.ps1 ..\launcher_windows.exe -iconFile ..\data\favicon.ico -company "Zariep Software" -description "WiPersona: PNGTuber on a web browser, Windows launcher" -title "WiPersona" -product "wipersona" -copyright "Zariep Software"
+
+ps2exe .\launcher_windows_nogui_ps2exe.ps1 .\launcher_windows_nogui.exe -iconFile ..\data\favicon.ico -company "Zariep Software" -description "WiPersona: PNGTuber on a web browser, Windows launcher (CLI)" -title "WiPersona" -product "wipersona" -copyright "Zariep Software"

@@ -1,11 +1,15 @@
 Add-Type -AssemblyName System.Windows.Forms
 
-$exePath = [System.IO.Path]::Combine($scriptPath, "windows_bin", "launcher_windows_nogui.exe")
+$scriptDir = Get-Location
+
+$exePath = [System.IO.Path]::Combine($scriptDir.Path, "windows_bin", "launcher_windows_nogui.exe")
+$IconPath = [System.IO.Path]::Combine($scriptDir.Path, "data", "favicon.ico")
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "WiPersona Windows Launcher"
 $form.Size = New-Object System.Drawing.Size(350, 100)
 $form.StartPosition = "CenterScreen"
+$Form.Icon = New-Object system.drawing.icon ($IconPath)
 
 $startButton = New-Object System.Windows.Forms.Button
 $startButton.Location = New-Object System.Drawing.Point(10, 10)
