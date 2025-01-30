@@ -51,6 +51,7 @@ function SaveSettings()
 	SaveSetting('AvatarSize', document.getElementById('StrAvatarSize').value);
 	SaveSetting('AvatarPosX', document.getElementById('StrPosX').value);
 	SaveSetting('AvatarPosY', document.getElementById('StrPosY').value);
+	SaveSetting('DesiredMicrophone', document.getElementById('MicrophoneList').value);
 	SaveSetting('SpeechThreshold', document.getElementById('Threshold').value);
 	SaveSetting('ScreamThreshold', document.getElementById('ThresholdScream').value);
 	SaveSetting('AvatarEffect', document.getElementById('EffectSelect').value);
@@ -68,6 +69,7 @@ function RestoreSettings()
 		SaveSetting('AvatarSize', 512);
 		SaveSetting('AvatarPosX', 0);
 		SaveSetting('AvatarPosY', 0);
+		SaveSetting('DesiredMicrophone', 'Default');
 		SaveSetting('SpeechThreshold', 15);
 		SaveSetting('ScreamThreshold', 30);
 		SaveSetting('AvatarEffect', 'none');
@@ -92,7 +94,8 @@ function ShareLink() {
 		AvatarDimEffect: document.getElementById('DimEffectSelect').value,
 		EffectOnScream: document.getElementById('effectonscream').checked,
 		SpeechThreshold: document.getElementById('ThresholdValue').textContent,
-		ScreamThreshold: document.getElementById('ThresholdValueScream').textContent
+		ScreamThreshold: document.getElementById('ThresholdValueScream').textContent,
+		DesiredMicrophone: document.getElementById('DesiredMicrophone').value
 	});
 	const configLink = `${DomainURL}?${params.toString()}`;
 	document.getElementById("LinkToConfig").innerHTML = `<label for="Link:">Link:</label><br> <textarea id="newlink" name="link" rows="7" cols="25">${configLink}</textarea>`;

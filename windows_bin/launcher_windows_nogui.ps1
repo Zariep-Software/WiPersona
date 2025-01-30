@@ -1,13 +1,12 @@
-$SCRIPT_PATH = $MyInvocation.MyCommand.Definition
+# Determine the script directory
+if ($PSScriptRoot) {
+	$SCRIPT_DIR = $PSScriptRoot
+} else {
+	$SCRIPT_DIR = Split-Path -Parent (Convert-Path -LiteralPath ([System.Environment]::GetCommandLineArgs()[0]))
+}
 
-$DataPath = Resolve-Path "$SCRIPT_DIR\..\data"
-
-$SCRIPT_DIR =
-	if ($PSScriptRoot) {
-		$PSScriptRoot
-	} else {
-		Split-Path -Parent (Convert-Path -LiteralPath ([System.Environment]::GetCommandLineArgs()[0]))
-	}
+# Set DataPath relative to the script directory
+$DataPath = Resolve-Path (Join-Path $SCRIPT_DIR '..\data')
 
 function Show-Usage {
 	Write-Host "Usage: $0 [-s | -b | -k]"

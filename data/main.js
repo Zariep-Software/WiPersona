@@ -37,6 +37,23 @@ function GetSetting(key, defaultValue)
 	});
 }
 
+// Assigning resources to variables
+const body = document.getElementById('body');
+import { LocalBackground, LocalAvatarSpeak, LocalAvatarSilence, LocalAvatarScream } from './res/sourcelist.js';
+var Background;
+var AvatarSpeak;
+var AvatarSilence;
+var AvatarScream;
+var AvatarSize;
+var AvatarEffect;
+var AvatarDimEffect;
+var EffectOnScream;
+var ShowBackground;
+var Avatar = document.getElementById('Avatar');
+
+var MicActive;
+var CurrentMic;
+
 // Load settings from IndexedDB and initialize UI
 function LoadSettings()
 {
@@ -51,8 +68,9 @@ function LoadSettings()
 		GetSetting('BackgroundColor', '#000000'),
 		GetSetting('ShowBackground', false),
 		GetSetting('SpeechThreshold', 15),
-		GetSetting('ScreamThreshold', 30)
-	]).then(([avatarSize, avatarAtCenter, avatarPosX, avatarPosY, avatarEffect, avatarDimEffect, effectOnScream, backgroundColor, showBackground, speechThreshold, screamThreshold]) =>
+		GetSetting('ScreamThreshold', 30),
+		GetSetting('DesiredMicrophone', 'Default')
+	]).then(([avatarSize, avatarAtCenter, avatarPosX, avatarPosY, avatarEffect, avatarDimEffect, effectOnScream, backgroundColor, showBackground, speechThreshold, screamThreshold, DesiredMicrophone]) =>
 	{
 		// Update UI elements
 		document.getElementById('togglecenter').checked = avatarAtCenter;
@@ -68,7 +86,7 @@ function LoadSettings()
 		document.getElementById('ThresholdValue').textContent = speechThreshold;
 		document.getElementById('ThresholdScream').value = screamThreshold;
 		document.getElementById('ThresholdValueScream').textContent = screamThreshold;
-
+		CurrentMic = DesiredMicrophone
 				Avatar.style.width = avatarSize + 'px';
 				Avatar.style.height = avatarSize + 'px';
 
@@ -81,22 +99,6 @@ function LoadSettings()
 		LoadAvatarPos();
 	}).catch(error => console.error('Error loading settings:', error));
 }
-
-// Assigning resources to variables
-const body = document.getElementById('body');
-import { LocalBackground, LocalAvatarSpeak, LocalAvatarSilence, LocalAvatarScream } from './res/sourcelist.js';
-var Background;
-var AvatarSpeak;
-var AvatarSilence;
-var AvatarScream;
-var AvatarSize;
-var AvatarEffect;
-var AvatarDimEffect;
-var EffectOnScream;
-var ShowBackground;
-var Avatar = document.getElementById('Avatar');
-
-var MicActive
 
 function GetParamValue(Param, DefaultValue)
 {
@@ -374,7 +376,6 @@ document.getElementById('DimEffectSelect').addEventListener('change', function(e
 {
 	AvatarDimEffect = document.getElementById('DimEffectSelect').value;
 	Avatar.className = 'Silence';
-	console.log(AvatarDimEffect)
 	Avatar.classList.add(AvatarDimEffect);
 });
 document.getElementById('effectonscream').addEventListener('change', function(event)
@@ -404,40 +405,105 @@ window.addEventListener('load', function ()
 	LoadSettings();
 });
 
-document.getElementById('RequestMicrophone').addEventListener('click', async () =>
+function ListMicrophones()
 {
+	const microphoneSelect = document.getElementById('MicrophoneList');
+
+	// Get the list of media devices
+	navigator.mediaDevices.enumerateDevices()
+		.then(devices =>
+		{
+			// Filter out devices that are not microphones
+			const microphones = devices.filter(device => device.kind === 'audioinput');
+
+			// If no microphones are found
+			if (microphones.length === 0)
+			{
+				const noMicOption = document.createElement('option');
+				noMicOption.textContent = 'No microphones found.';
+				noMicOption.disabled = true;
+				microphoneSelect.appendChild(noMicOption);
+			}
+			else
+			{
+				// Loop through microphones and add them as options
+				microphones.forEach(mic =>
+				{
+					const micOption = document.createElement('option');
+					micOption.value = mic.deviceId;
+					micOption.textContent = mic.label || `Unnamed Microphone (ID: ${mic.deviceId})`;
+					microphoneSelect.appendChild(micOption);
+				});
+
+				// Set the desired mic in the mic list, if not available, set the first option of the list
+				// This behavior fallback to the Default device, but when the device is available again, it set it properly
+				const isValidOption = [...microphoneSelect.options].some(option => option.value === CurrentMic);
+				microphoneSelect.value = isValidOption ? CurrentMic : microphoneSelect.options[0].value;
+			}
+		})
+		.catch(err =>
+		{
+			console.error('Error accessing media devices:', err);
+			const errorOption = document.createElement('option');
+			errorOption.textContent = 'Error accessing media devices.';
+			errorOption.disabled = true;
+			microphoneSelect.appendChild(errorOption);
+		});
+}
+
+var Stream = null;
+var audioCtx = null;
+var isCancelled = false;
+
+async function StartMicrophone(selectedDeviceId)
+{
+	if (Stream)
+	{
+		Stream.getTracks().forEach(track => track.stop());
+	}
+	Stream = null;
+
 	try
 	{
 		if (!MicActive)
 		{
 			MicActive = 1;
-			document.getElementById('RequestMicrophone').style.display = "None";
-			document.getElementById('str-micaccess').style.display = "None";
+			document.getElementById('RequestMicrophone').style.display = "none";
+			document.getElementById('str-micaccess').style.display = "none";
 		}
 		else
 		{
+			MicActive = 0;
 			return;
 		}
 
-		// Requesting access to the user's microphone
-		const Stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-		// Updating the status text to indicate permission granted and microphone active
-		document.getElementById('Status').textContent = 'Permission granted. Microphone is active.';
+		const constraints =
+		{
+			audio: { deviceId: selectedDeviceId }
+		};
 
-		// Creating an audio context and necessary audio nodes for processing
-		const AudioContext = new (window.AudioContext || window.webkitAudioContext)();
-		const Analyser = AudioContext.createAnalyser();
-		const Microphone = AudioContext.createMediaStreamSource(Stream);
-		const ScriptProcessor = AudioContext.createScriptProcessor(256, 1, 1);
+		Stream = await navigator.mediaDevices.getUserMedia(constraints);
+		document.querySelectorAll('.ph').forEach(element =>
+		{
+			element.style.display = 'inline-block';
+		});
 
-		// Setting properties for the analyser node
+		if (audioCtx)
+		{
+			audioCtx.close();
+		}
+		audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+		let Analyser = audioCtx.createAnalyser();
+		let Microphone = audioCtx.createMediaStreamSource(Stream);
+		let ScriptProcessor = audioCtx.createScriptProcessor(256, 1, 1);
+
 		Analyser.smoothingTimeConstant = 0.3;
 		Analyser.fftSize = 1024;
 
-		// Connecting the audio nodes
 		Microphone.connect(Analyser);
 		Analyser.connect(ScriptProcessor);
-		ScriptProcessor.connect(AudioContext.destination);
+		ScriptProcessor.connect(audioCtx.destination);
 
 		// Getting references to HTML elements for threshold controls
 		const ThresholdSlider = document.getElementById('Threshold');
@@ -453,14 +519,12 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 		ThresholdValueDisplayScream.textContent = ThresholdSliderScream.value;
 		ThresholdLineScream.style.left = `${ThresholdSliderScream.value}%`;
 
-		// Event listener for threshold slider to update threshold value display and line position
 		ThresholdSlider.addEventListener('input', () =>
 		{
 			ThresholdValueDisplay.textContent = ThresholdSlider.value;
 			ThresholdLine.style.left = `${ThresholdSlider.value}%`;
 		});
 
-		// Event listener for scream threshold slider
 		ThresholdSliderScream.addEventListener('input', () =>
 		{
 			ThresholdValueDisplayScream.textContent = ThresholdSliderScream.value;
@@ -473,21 +537,18 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 
 		ScriptProcessor.onaudioprocess = () =>
 		{
-			// Audio processor
-			const Array = new Uint8Array(Analyser.frequencyBinCount);
+			var Array = new Uint8Array(Analyser.frequencyBinCount);
 			Analyser.getByteFrequencyData(Array);
-			const Values = Array.reduce((a, b) => a + b, 0);
-			const Average = Values / Array.length;
+			var Values = Array.reduce((a, b) => a + b, 0);
+			var Average = Values / Array.length;
 
-			// Update elements based on audio status
-			const VoiceStatus = document.getElementById('VoiceStatus');
-			const Threshold = parseInt(ThresholdSlider.value, 10);
-			const ThresholdScream = parseInt(ThresholdSliderScream.value, 10);
-			const VolumeLevel = document.getElementById('VolumeLevel');
+			var VoiceStatus = document.getElementById('VoiceStatus');
+			var Threshold = parseInt(ThresholdSlider.value, 10);
+			var ThresholdScream = parseInt(ThresholdSliderScream.value, 10);
+			var VolumeLevel = document.getElementById('VolumeLevel');
 
 			VolumeLevel.style.width = `${Average}%`;
 
-			// Audio handler
 			let NewAvatar = "";
 			let NewStatus = "";
 
@@ -501,26 +562,28 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 				NewStatus = 'Status: Speaking';
 				NewAvatar = "Speak";
 			}
-			else if (Average < Threshold)
+			else
 			{
 				NewStatus = 'Status: Silence';
 				NewAvatar = "Silence";
 			}
 
-			// Get current time
-			const CurrentTime = new Date().getTime();
 			// Update voice and avatar status only if there is a real change and enough time has passed
+			const CurrentTime = new Date().getTime();
 			if ((NewAvatar !== PreviousAvatar || VoiceStatus.textContent !== NewStatus) && (CurrentTime - LastUpdateTime > UpdateDelay))
 			{
+				if (CurrentMic != selectedDeviceId)
+				{
+					Stream.getTracks().forEach(track => track.stop());
+					return 1;
+				}
+
 				VoiceStatus.textContent = NewStatus;
 
-				// Function to dynamically create or update a CSS rule
 				function addDynamicCSSRule(className, imageUrl)
 				{
-					const styleSheet = document.styleSheets[0]; // Get the first stylesheet
+					const styleSheet = document.styleSheets[0];
 					const rule = `.${className} { background-image: url(${imageUrl}); }`;
-
-					// If the rule already exists, remove it before adding the new one
 					for (let i = 0; i < styleSheet.cssRules.length; i++)
 					{
 						if (styleSheet.cssRules[i].selectorText === `.${className}`)
@@ -529,23 +592,17 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 							break;
 						}
 					}
-
-					// Add the new rule
 					styleSheet.insertRule(rule, styleSheet.cssRules.length);
 				}
 
-				// Now dynamically inject the background-image into the CSS classes
 				addDynamicCSSRule('Scream', AvatarScream);
 				addDynamicCSSRule('Speak', AvatarSpeak);
 				addDynamicCSSRule('Silence', AvatarSilence);
 
-				// Clear all avatar state classes first
 				Avatar.classList.remove('Scream', 'Speak', 'Silence', AvatarEffect);
-
 				Avatar.style.width = AvatarSize + 'px';
 				Avatar.style.height = AvatarSize + 'px';
 
-				// Set the appropriate class based on the avatar state
 				if (NewAvatar === "Scream")
 				{
 					Avatar.classList.add('Scream');
@@ -553,12 +610,11 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 					{
 						Avatar.className = 'Scream';
 						void Avatar.offsetWidth;
-						Avatar.classList.add(AvatarEffect);
-						Avatar.classList.add(AvatarDimEffect);
+						Avatar.classList.add(AvatarEffect, AvatarDimEffect);
 					}
 					else
 					{
-					Avatar.classList.add(AvatarEffect);
+						Avatar.classList.add(AvatarEffect);
 					}
 				}
 				else if (NewAvatar === "Speak")
@@ -567,23 +623,20 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 					{
 						Avatar.classList.add('Speak');
 						void Avatar.offsetWidth;
-						Avatar.classList.add(AvatarEffect);
-						Avatar.classList.add(AvatarDimEffect);
+						Avatar.classList.add(AvatarEffect, AvatarDimEffect);
 					}
 					else if (PreviousAvatar === "Scream")
 					{
 						Avatar.className = 'Speak';
-						Avatar.classList.add(AvatarDimEffect+0);
+						Avatar.classList.add(AvatarDimEffect + 0);
 					}
 				}
-				else if (NewAvatar === "Silence")
+				else
 				{
 					Avatar.className = 'Silence';
-					Avatar.classList.add(AvatarEffect);
-					Avatar.classList.add(AvatarDimEffect);
+					Avatar.classList.add(AvatarEffect, AvatarDimEffect);
 				}
 
-				// Update Time and avatar
 				void Avatar.offsetWidth;
 				PreviousAvatar = NewAvatar;
 				LastUpdateTime = CurrentTime;
@@ -592,8 +645,51 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 	}
 	catch (Error)
 	{
-		// Handling errors if permission is denied or there's an error requesting microphone access
-		document.getElementById('Status').textContent = 'Permission denied or there was an error. if you are using OBS Studio "Browser", use "--enable-media-stream" flag';
+		//document.getElementById('Status').textContent = 'Permission denied or there was an error. If you are using OBS Studio "Browser", use "--enable-media-stream" flag';
+		document.getElementById('Status1').style.display = 'inline-block';
 		console.error('Error requesting microphone permission:', Error);
+	}
+}
+
+function StopMicrophone()
+{
+	if (Stream)
+	{
+		Stream.getTracks().forEach(track => track.stop());
+		Stream = null;
+	}
+	if (audioCtx && audioCtx.state !== 'closed')
+	{
+		audioCtx.close();
+		audioCtx = null;
+	}
+	isCancelled = true;
+}
+
+document.getElementById('MicrophoneList').addEventListener('change', async function ()
+{
+	StopMicrophone();
+	CurrentMic = this.value;
+	MicActive = 0;
+	StartMicrophone(CurrentMic);
+});
+
+document.getElementById('RequestMicrophone').addEventListener('click', async () =>
+{
+	ListMicrophones();
+	StartMicrophone(CurrentMic);
+});
+
+document.getElementById('ToggleMicrophone').addEventListener('click', async () =>
+{
+	if (MicActive === 0)
+	{
+		StartMicrophone(CurrentMic);
+		MicActive = 1;
+	}
+	else
+	{
+		StopMicrophone();
+		MicActive = 0;
 	}
 });

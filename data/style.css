@@ -21,8 +21,11 @@ a {
 color: white;
 }
 
-#VoiceStatus {
-display: none;
+.ph {
+	display: none;
+}
+#Status1 {
+	display: none;
 }
 
 #Avatar {

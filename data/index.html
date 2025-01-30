@@ -77,8 +77,11 @@
 		<h2 id="str-voicesettings" >Voice Settings</h2>
 		<h5 id="str-micaccess" >Give mic access to completely start the program</h5>
 		<button id="RequestMicrophone">Request mic access</button>
-		<p id="Status"></p>
-		<span id="VoiceStatus">Voice Status: Silence</span>
+		<p class="ph" id="Status0">Permission granted. Microphone is available.</p><br>
+		<p id="Status1">Permission denied or there was an error. If you are using OBS Studio "Browser", use "--enable-media-stream" flag.</p>
+		<span class="ph" id="VoiceStatus">Voice Status: Silence</span><br>
+		<select class="ph" id="MicrophoneList"></select>
+		<button class="ph" id="ToggleMicrophone">Pause/Resume Microphone</button>
 		<div class="ThresholdContainer">
 			<label id="str-speechthreshold"  for="Threshold">Speech Threshold: </label>
 			<input type="range" id="Threshold" min="0" max="100" value="15"><span id="ThresholdValue">15</span>
@@ -99,7 +102,7 @@
 	</td>
 	<td class="credits">
 		<h1>WiPersona</h1>
-		<h3>v1.22</h3>
+		<h3>v1.23</h3>
 		<h3 id="str-zariepsoftware"><a href="https://github.com/Zariep-Software/" target="_blank">Zariep software 2025</a><h3>
 		<h3 id="str-sourcecode"><a href="https://github.com/Zariep-Software/WiPersona" target="_blank">Source code</a><h3>
 		<h3 id="str-onlinemanual"><a href="https://github.com/Zariep-Software/WiPersona/wiki" target="_blank">Online manual</a><h3>
