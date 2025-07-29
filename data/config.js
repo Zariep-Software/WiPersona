@@ -60,12 +60,15 @@ function SaveSettings()
 	SaveSetting('EffectOnScream', document.getElementById('effectonscream').checked);
 	SaveSetting('BackgroundColor', document.getElementById('bgcolor').value);
 	SaveSetting('ShowBackground', document.getElementById('showbg').checked);
+	const el = document.getElementById('str-configurationsaved');
+		el.classList.remove('hidden');
+		setTimeout(() => {el.classList.add('hidden');}, 3000);
 }
 
 function RestoreSettings()
 {
 	if (confirm("Are you sure?"))
-{
+	{
 		SaveSetting('AvatarSize', 512);
 		SaveSetting('AvatarPosX', 0);
 		SaveSetting('AvatarPosY', 0);
@@ -95,7 +98,7 @@ function ShareLink() {
 		EffectOnScream: document.getElementById('effectonscream').checked,
 		SpeechThreshold: document.getElementById('ThresholdValue').textContent,
 		ScreamThreshold: document.getElementById('ThresholdValueScream').textContent,
-		DesiredMicrophone: document.getElementById('DesiredMicrophone').value
+		DesiredMicrophone: document.getElementById('MicrophoneList').value
 	});
 	const configLink = `${DomainURL}?${params.toString()}`;
 	document.getElementById("LinkToConfig").innerHTML = `<label for="Link:">Link:</label><br> <textarea id="newlink" name="link" rows="7" cols="25">${configLink}</textarea>`;

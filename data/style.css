@@ -1,16 +1,40 @@
 body {
-text-align: center;
-color: white;
-background-color: black;
-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	text-align: center;
+	color: #eee;
+	background-color: black;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-table {
-width: 100%;
+td {
+	border: none;
+	padding: 10px;
+}
+
+.mainsettings {
+	border-right: 3px solid #444;
+	flex: 1;
+}
+
+.draggableimages {
+	flex: 0.7;
+	vertical-align: top;
 }
 
 .credits {
-width: 20%;
+	flex: 0.5;
+	border-left: 3px solid #444;
+}
+
+.settingsview {
+	padding: 10px;
+}
+
+hr {
+	border-color: #444;
+	background-color: #444;
+	color: #444;
+	height: 2px;
+	border: none;
 }
 
 .credits td {
@@ -18,7 +42,13 @@ text-align: right;
 }
 
 a {
-color: white;
+	color: white;
+	transition: color 0.3s ease;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #91a666;
 }
 
 .ph {
@@ -28,18 +58,85 @@ color: white;
 	display: none;
 }
 
-#Avatar {
-	position: fixed;
-	background-size: contain;
-	background-position: center;
-	background-repeat: no-repeat;
-}
-#.Scream {}
-#.Speak {}
-#.Silence {}
-
 input[type="range"] {
 	width: 20%;
+}
+
+input[type="number"], select {
+	color: #eee;
+	background-color: #2a2a2a;
+	padding: 5px;
+	margin: 0px 0 6px 0px;
+	border: 2px solid #444;
+	border-radius: 6px;
+	transition: border-color 0.3s ease;
+}
+
+textarea {
+	background-color: #2a2a2a;
+	color: #eee;
+	border-radius: 6px;
+	overflow: clip;
+	border: 2px solid #444;
+	transition: border-color 0.3s ease;
+}
+
+.customButton {
+		display: inline-block;
+		width: 64px;
+		height: 64px;
+		background-color: #2a2a2a;
+		border: 2px solid #444;
+		border-radius: 10px;
+		text-align: center;
+		cursor: pointer;
+		overflow: hidden;
+		position: relative;
+	transition: border-color 0.3s ease;
+}
+.customButton span {
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: #eee;
+	font-size: 16px;
+}
+.customButton img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: none;
+}
+
+
+
+input[type="number"]:hover, textarea:hover, select:hover, textarea:hover,
+.customButton:hover {
+	border: 2px solid #91a666;
+}
+
+
+input[type="color"]
+{
+	background-color: #2a2a2a;
+	color: #eee;
+	border-radius: 6px;
+	overflow: clip;
+	border: 2px solid #444;
+	transition: border-color 0.3s ease;
+}
+
+.title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	height: 3rem
+}
+
+h5 {
+		margin: 0px;
 }
 
 #VolumeBar {
@@ -107,6 +204,10 @@ input[type="range"] {
 }
 
 .SettingsWindow {
+	display:flex;
+	border: 3px solid #444;
+	background-color: #111111cc;
+	border-radius: 16px;
 	position: fixed;
 	text-align: left;
 	top: 50%;
@@ -114,114 +215,313 @@ input[type="range"] {
 	margin-right: -50%;
 	transform: translate(-50%, -50%);
 	width: 90%;
-	background-color: #11111160;
-	border-radius: 16px;
 	max-height: 90%;
 	overflow-y: auto;
 }
 
+#content {
+	display: flex;
+	flex-direction: column;
+}
+
 .LinkToConfig h6 {
 	word-wrap: break-word;
+	display:none;
 }
 
+button {
+	border-radius: 6px;
+	background-color: #222;
+	border: 2px solid #666;
+	padding: 5px;
+	margin: 3px;
+	color: #eee;
+	transition: border-color 0.3s ease;
+}
+
+button:hover {
+	border: 2px solid #91a666;
+	cursor: pointer;
+}
+
+.hidden {
+	display:none;
+}
+
+.add-images-section {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 15px;
+}
+
+.file-input {
+	margin-bottom: 10px;
+}
+
+.btn {
+	cursor: pointer;
 /*
-Effect Section
+	width: 100%;
 */
-
-.bounce {
-	animation: bounce 0.4s;
-}
-.shake {
-	animation: bounce 0.2s;
-}
-@keyframes bounce {
-	10%  { transform: translate(-50%, -50%) translateY(0%); }
-	30%  { transform:translate(-50%, -50%) translateY(-5%); }
-	50%  { transform: translate(-50%, -50%) translateY(0%); }
-	65%  { transform: translate(-50%, -50%) translateY(-5%); }
-	77%  { transform:translate(-50%, -50%) translateY(0%); }
-	99%  { transform: translate(-50%, -50%) translateY(-3%); }
-	100% { transform:translate(-50%, -50%) translateY(0%); }
 }
 
-.gelatine {
-	animation: gelatine 0.5s 0.5;
-}
-@keyframes gelatine {
-	from, to { transform: translate(-50%, -50%) scale(1, 1); }
-	25% { transform: translate(-50%, -50%) scale(0.9, 1.1); }
-	50% { transform: translate(-50%, -50%) scale(1.1, 0.9); }
-	75% { transform: translate(-50%, -50%) scale(0.95, 1.05); }
+.btn.danger {
+	background: #dc3545;
+	border: 2px solid #a31f2c;
+	color: #eee;
 }
 
-.pulse {
-	animation: pulse 0.2s 1 ;
-}
-@keyframes pulse {
-	from, to { transform: translate(-50%, -50%) scale(1, 1); }
-	50% { transform: translate(-50%, -50%) scale(1.2, 1.2); }
-	75% { transform: translate(-50%, -50%) scale(1.2, 1.2); }
+.btn.danger:hover {
+	background: #c92333;
 }
 
-.swing {
-	transform-origin: bottom center;
-	animation: swing 0.5s;
-}
-.swingtop {
-	transform-origin: top center;
-	animation: swing 0.5s;
-}
-@keyframes swing {
-	20% { transform: translate(-50%, -50%) rotate(10deg); }
-	40% { transform: translate(-50%, -50%) rotate(-10deg); }
-	60% { transform: translate(-50%, -50%) rotate(5deg); }
-	80% { transform: translate(-50%, -50%) rotate(-5deg); }
-	100% { transform: translate(-50%, -50%) rotate(0deg); }
+.action-buttons {
+	display: flex;
+	gap: 10px;
+	margin-top: 15px;
 }
 
-#Avatar.Silence.bright {
+#canvas {
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+}
+
+.draggable-image {
+	position: absolute;
+	cursor: move;
+	border: 2px solid transparent;
+	border-radius: 4px;
+	transition: border-color 0.2s;
+}
+
+.draggable-image:hover {
 /*
-	--brightness-input: 1.5;
-	--brightness-output: 1;
-	animation: dim 0.5s forwards;
+	border-color: #007bff;
 */
-	filter: brightness(1);
 }
-#Avatar.Speak.bright {
+
+.draggable-image.dragging {
+	border-color: #28a745;
+	z-index: 1000;
+	cursor: grabbing;
+	opacity: 0.6;
+}
+
+.draggable-image.imported:hover {
+	border-bottom: 3px solid #28a745;
+}
+
+.draggable-image.remote:hover {
+	border-bottom: 3px solid #007bff;
+}
+.remote-input {
+	display: block;
+	margin: 5px auto;
+	width: 90%;
+	background-color: #2A2A2A;
+	padding: 7px;
+	border: 3px solid #444;
+	border-radius: 6px;
+	color: #eee
+}
+.remote-panel {
+	display:flex;
+	flex-direction: row;
+}
+
+.image-controls {
+	position: absolute;
+	top: -30px;
+	right: 0;
+	background: rgba(0,0,0,0.8);
+	border-radius: 4px;
+	opacity: 0;
+	transition: opacity 0.2s;
+	display: flex;
+	gap: 5px;
+}
+
+.draggable-image:hover .image-controls {
+	opacity: 1;
+}
+
+.control-btn {
+	color: white;
+	border: none;
+	padding: 4px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+}
+
+.delete-btn {
+	background: #dc3545;
+}
+
+.info-btn {
 /*
-	--brightness-input: 1;
-	--brightness-output: 1.5;
-	animation: dim 0.5s forwards;
+	background: #17a2b9;
 */
-	filter: brightness(1.5);
 }
-#Avatar.Speak.bright0 {
-	filter: brightness(1.5);
+
+.status {
+	margin-top: 10px;
+	padding: 10px;
+	border-radius: 4px;
+	display: none;
 }
-#Avatar.Scream.bright {
-	filter: brightness(1.5);
+
+.status.success {
+	background: #d4edda;
+	color: #155724;
+	border: 1px solid #c3e6cb;
 }
-#Avatar.Silence.dim {
-/*
-	--brightness-input: 1;
-	--brightness-output: 0.5;
-	animation: dim 0.5s forwards;
-*/
-	filter: brightness(0.5);
+
+.status.error {
+	background: #f9d7da;
+	color: #721c24;
+	border: 1px solid #f5c6cb;
 }
-#Avatar.Speak.dim {
-/*
-	--brightness-input: 0.5;
-	--brightness-output: 1;
-	animation: dim 0.5s forwards;
-*/
-	filter: brightness(1);
+
+.legend {
+	display: flex;
+	gap: 20px;
+	margin-top: 10px;
+	font-size: 14px;
 }
-@keyframes dim {
-	from {
-		filter: brightness(brightness(var(--brightness-input)));
+
+.legend-item {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.legend-color {
+	width: 20px;
+	height: 3px;
+	border-radius: 2px;
+}
+
+.legend-imported {
+	background: #29a745;
+}
+
+.legend-remote {
+	background: #007bff;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button
+{
+	background-color: #2a2a2a;
+	color: #eee;
+}
+
+.custom-checkbox input[type="checkbox" i]
+{
+	display: none;
+}
+
+.custom-checkbox .checkmark {
+	display: inline-block;
+	width: 0.7rem;
+	height: 0.7rem;
+	background-color: #2a2a2a;
+	border: 2px solid #444;
+	border-radius: 4px;
+	position: relative;
+	vertical-align: middle;
+	margin-right: 8px;
+	transition: background-color 0.2s ease;
+}
+
+
+.custom-checkbox input[type="checkbox"]:checked + .checkmark,
+input[type="checkbox"]:checked + .custom-checkbox .checkmark {
+	background-color: #91a666;
+}
+
+.custom-checkbox input[type="checkbox"]:checked + .checkmark::after,
+.custom-checkbox input[type="checkbox"]:checked ~ .checkmark::after,
+input[type="checkbox"]:checked + .custom-checkbox .checkmark::after {
+	content: "";
+	position: absolute;
+	left: 4px;
+	bottom: 1px;
+	width: 0.2rem;
+	height: 0.6rem;
+	border: solid white;
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+
+
+/* Total scrollbar */
+::-webkit-scrollbar {
+	width: 9px; /* For vertical scrollbars */
+	height: 9px; /* For horizontal scrollbars */
+
+}
+
+/* Track (background) */
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+/* Handle (thumb) */
+::-webkit-scrollbar-thumb {
+	background-color: #444;
+	border-radius: 6px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background-color: #666;
+}
+
+.resize-handle {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	width: 20px;
+	height: 20px;
+	background: rgba(0, 0, 0, 0.3);
+	color: white;
+	text-align: center;
+	cursor: se-resize;
+	font-size: 14px;
+	line-height: 20px;
+	border-top-left-radius: 4px;
+	user-select: none;
+	z-index: 5;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+
+.draggable-image:hover .resize-handle {
+	display: block;
+	opacity: 1;
+}
+
+@media only screen and (max-aspect-ratio: 1/1) {
+
+	.SettingsWindow
+	{
+		flex-direction: column;
 	}
-	to {
-		filter: brightness(var(--brightness-output));
+
+	.mainsettings {
+		border-right: none;
+		border-bottom: 3px solid #444;
+		flex: 1;
 	}
+
+	.credits {
+		flex: 0.5;
+		border-left: none;
+		border-top: 3px solid #444;
+	}
+
 }

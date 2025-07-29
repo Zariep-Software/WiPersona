@@ -1,0 +1,122 @@
+/*
+Effect Section
+*/
+
+#Avatar {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+	cursor: grab;
+}
+
+
+#Avatar.dragging {
+	cursor: grabbing;
+	opacity: 0.7;
+}
+
+#.Scream {}
+#.Speak {}
+#.Silence {}
+
+.bounce {
+	animation: bounce 0.4s;
+}
+.shake {
+	animation: bounce 0.2s;
+}
+@keyframes bounce {
+	10%  { transform: translate(-50%, -50%) translateY(0%); }
+	30%  { transform:translate(-50%, -50%) translateY(-5%); }
+	50%  { transform: translate(-50%, -50%) translateY(0%); }
+	65%  { transform: translate(-50%, -50%) translateY(-5%); }
+	77%  { transform:translate(-50%, -50%) translateY(0%); }
+	99%  { transform: translate(-50%, -50%) translateY(-3%); }
+	100% { transform:translate(-50%, -50%) translateY(0%); }
+}
+
+.gelatine {
+	animation: gelatine 0.5s 0.5;
+}
+@keyframes gelatine {
+	from, to { transform: translate(-50%, -50%) scale(1, 1); }
+	25% { transform: translate(-50%, -50%) scale(0.9, 1.1); }
+	50% { transform: translate(-50%, -50%) scale(1.1, 0.9); }
+	75% { transform: translate(-50%, -50%) scale(0.95, 1.05); }
+}
+
+.pulse {
+	animation: pulse 0.2s 1 ;
+}
+@keyframes pulse {
+	from, to { transform: translate(-50%, -50%) scale(1, 1); }
+	50% { transform: translate(-50%, -50%) scale(1.2, 1.2); }
+	75% { transform: translate(-50%, -50%) scale(1.2, 1.2); }
+}
+
+.swing {
+	transform-origin: bottom center;
+	animation: swing 0.5s;
+}
+.swingtop {
+	transform-origin: top center;
+	animation: swing 0.5s;
+}
+@keyframes swing {
+	20% { transform: translate(-50%, -50%) rotate(10deg); }
+	40% { transform: translate(-50%, -50%) rotate(-10deg); }
+	60% { transform: translate(-50%, -50%) rotate(5deg); }
+	80% { transform: translate(-50%, -50%) rotate(-5deg); }
+	100% { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+#Avatar.Silence.bright {
+/*
+	--brightness-input: 1.5;
+	--brightness-output: 1;
+	animation: dim 0.5s forwards;
+*/
+	filter: brightness(1);
+}
+#Avatar.Speak.bright {
+/*
+	--brightness-input: 1;
+	--brightness-output: 1.5;
+	animation: dim 0.5s forwards;
+*/
+	filter: brightness(1.5);
+}
+#Avatar.Speak.bright0 {
+	filter: brightness(1.5);
+}
+#Avatar.Scream.bright {
+	filter: brightness(1.5);
+}
+#Avatar.Silence.dim {
+/*
+	--brightness-input: 1;
+	--brightness-output: 0.5;
+	animation: dim 0.5s forwards;
+*/
+	filter: brightness(0.5);
+}
+#Avatar.Speak.dim {
+/*
+	--brightness-input: 0.5;
+	--brightness-output: 1;
+	animation: dim 0.5s forwards;
+*/
+	filter: brightness(1);
+}
+@keyframes dim {
+	from {
+		filter: brightness(brightness(var(--brightness-input)));
+	}
+	to {
+		filter: brightness(var(--brightness-output));
+	}
+}

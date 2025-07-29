@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>WiPersona</title>
 	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="avatareffects.css">
 	<!--Using SJTSW as translation system-->
 	<script src="translations.js"></script>
 	<script src="external/SJTSW/sjtsw.js"></script>
@@ -13,82 +14,135 @@
 <body id="body" class="body">
 	<input type="checkbox" id="togglemenu">
 	<label for="togglemenu">
-
-	<div id="Avatar"> </div>
+	<div id="canvas"></div>
+	<div id="Avatar" title="You can drag me"> </div>
 </label>
+
 <div class="SettingsWindow">
-<table border="1">
-	<tr>
-	<td>
+
+	<!-- LEFT COLUMN -->
+	<div class="mainsettings settingsview">
 		<!--AVATAR SETTINGS-->
-		<h2 id="str-avatarsettings">Avatar Settings</h2>
+		<div class="title">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				stroke-linecap="round" stroke-linejoin="round"
+				class="icon icon-tabler icons-tabler-outline icon-tabler-user">
+				<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+				<path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+				<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+			</svg>
+			<h2 id="str-avatarsettings">Avatar Settings</h2>
+		</div>
+
+	<span id="str-avatarfolder">Avatar workspace</span>
+		<select id="Workspace">
+		<option value="none">Default</option>
+		</select>
 		<form action="#" method="post" enctype="multipart/form-data">
-			<span for="imagen" id="str-avatarmute">Avatar (Mute):</span>
+			<span id="str-avatarmute">(Mute):</span>
 			<input type="file" id="AvatarMuted" name="imagen" accept="image/*">
 		</form>
 
 		<form action="#" method="post" enctype="multipart/form-data">
-			<span for="imagen" id="str-avatartalking">Avatar (Talking):</span>
+			<span id="str-avatartalking">(Talking):</span>
 			<input type="file" id="AvatarSpeaking" name="imagen" accept="image/*">
 		</form>
 
-			<form action="#" method="post" enctype="multipart/form-data">
-			<span for="imagen" id="str-avatarscreaming">Avatar (Screaming):</span>
+		<form action="#" method="post" enctype="multipart/form-data">
+			<span id="str-avatarscreaming">(Screaming):</span>
 			<input type="file" id="AvatarScreaming" name="imagen" accept="image/*">
 		</form>
 
-		<span id="str-avataratcenter">Avatar at center:</span> <input type="checkbox" id="togglecenter">
-		<div class="ifnotcenter">
-		<span id="str-xposition">X Position:</span><span id="PosX"> </span> <input type="number" id="StrPosX" min="1" max="9999"value="10"> <br>
-		<span id="str-yposition">Y Position:</span><span id="PosY"> </span> <input type="number" id="StrPosY" min="1" max="9999" value="10"> <br>
-		</div><br>
-		<span id="str-avatarsize">Avatar Size (px):</span> <span id="AvatarSize"> </span>
-			<input type="number" id="StrAvatarSize" min="1" max="9999" value="512"> <br>
-		<span id="str-intalkeffect">In-talk effect:</span>
-		<select name="Effect" id="EffectSelect">
-			<option id="str-ite-none" value="none">None</option>
-			<option id="str-bounce" value="bounce">Bounce</option>
-			<option id="str-gelatine" value="gelatine">Gelatine</option>
-			<option id="str-pulse" value="pulse">Pulse</option>
-			<option id="str-shake" value="shake">Shake</option>
-			<option id="str-swing" value="swing">Swing</option>
-			<option id="str-swingtop" value="swingtop">Swing (From top)</option>
-		</select> <br>
-		<span id="str-brightnesseffect">Brightness effect:</span>
-		<select name="DimEffect" id="DimEffectSelect">
-			<option id="str-be-dim" value="none">None</option>
-			<option id="str-bright" value="bright">Bright when speaking</option>
-			<option id="str-dim" value="dim">Dim if muted</option>
-		</select> <br>
-		<span id="str-effectontalktoscream">Effect on Talk to Scream: </span> <input type="checkbox" id="effectonscream"> 
-		<!--BACKGROUND SETTINGS-->
-		<h2 id="str-backgroundsettings" >Background Settings</h2>
+		<span id="str-avataratcenter">Avatar at center:</span>
+		<input type="checkbox" id="togglecenter" hidden>
+		<label class="custom-checkbox" for="togglecenter">
+			<span class="checkmark"></span>
+		</label>
 
-		<span id="str-backgroundcolor" >Background Color:</span> <input type="color" id="bgcolor"> <br>
-		<span id="str-imagebackground" >Image background:</span> <input type="checkbox" id="showbg">
-			<div class="ifshowbg">
-				<form action="#" method="post" enctype="multipart/form-data">
-					<span id="str-selectbackground"  for="imagen">Select background: </span>
-					<input type="file" id="SelectBG" name="imagen" accept="image/*">
-				</form>
-			</div>
+		<div class="ifnotcenter">
+			<span id="str-xposition">X:</span>
+			<input type="number" id="StrPosX" min="1" max="9999" value="10">
+			<span id="str-yposition">Y:</span>
+			<input type="number" id="StrPosY" min="1" max="9999" value="10">
+		</div>
+
+	<div>
+		<span id="str-avatarsize">Avatar Size (px):</span>
+		<input type="number" id="StrAvatarSize" min="1" max="9999" value="512"> <br>
+	</div>
+
+		<span id="str-intalkeffect">In-talk effect:</span>
+		<select id="EffectSelect">
+			<option value="none">None</option>
+			<option value="bounce">Bounce</option>
+			<option value="gelatine">Gelatine</option>
+			<option value="pulse">Pulse</option>
+			<option value="shake">Shake</option>
+			<option value="swing">Swing</option>
+			<option value="swingtop">Swing (From top)</option>
+		</select> <br>
+
+		<span id="str-brightnesseffect">Brightness effect:</span>
+		<select id="DimEffectSelect">
+			<option value="none">None</option>
+			<option value="bright">Bright when speaking</option>
+			<option value="dim">Dim if muted</option>
+		</select> <br>
+
+		<span id="str-effectontalktoscream">Effect on Talk to Scream:</span>
+			<label class="custom-checkbox">
+		<input type="checkbox" id="effectonscream">
+		<span class="checkmark"></span>
+	</label>
+
+		<!--BACKGROUND SETTINGS-->
+	<div class="title">
+		<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-photo"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8h.01" /><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z" /><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5" /><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3" /></svg>
+		<h2 id="str-backgroundsettings">Background Settings</h2>
+	</div>
+		<span id="str-backgroundcolor">Background Color:</span>
+		<input type="color" id="bgcolor"><br>
+
+		<span id="str-imagebackground">Image background:</span>
+	<label class="custom-checkbox">
+		<input type="checkbox" id="showbg">
+		<span class="checkmark"></span>
+	</label>
+		<div class="ifshowbg">
+			<form action="#" method="post" enctype="multipart/form-data">
+				<span id="str-selectbackground">Select background: </span>
+				<input type="file" id="SelectBG" name="imagen" accept="image/*">
+			</form>
+		</div>
 
 		<!--VOICE SETTINGS-->
-		<h2 id="str-voicesettings" >Voice Settings</h2>
-		<h5 id="str-micaccess" >Give mic access to completely start the program</h5>
+	<div class="title">
+		<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-microphone"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 2m0 3a3 3 0 0 1 3 -3h0a3 3 0 0 1 3 3v5a3 3 0 0 1 -3 3h0a3 3 0 0 1 -3 -3z" /><path d="M5 10a7 7 0 0 0 14 0" /><path d="M8 21l8 0" /><path d="M12 17l0 4" /></svg>
+		<h2 id="str-voicesettings">Voice Settings</h2>
+	</div>
+		<h5 id="str-micaccess">Give mic access to completely start the program</h5>
 		<button id="RequestMicrophone">Request mic access</button>
-		<p class="ph" id="Status0">Permission granted. Microphone is available.</p><br>
+	<div id="Status0" class="hidden">
+		<p class="ph" id="permissiongranted">Permission granted. Microphone is available.</p>
+		<br>
+	</div>
 		<p id="Status1">Permission denied or there was an error. If you are using OBS Studio "Browser", use "--enable-media-stream" flag.</p>
+
 		<span class="ph" id="VoiceStatus">Voice Status: Silence</span><br>
 		<select class="ph" id="MicrophoneList"></select>
 		<button class="ph" id="ToggleMicrophone">Pause/Resume Microphone</button>
+
 		<div class="ThresholdContainer">
-			<label id="str-speechthreshold"  for="Threshold">Speech Threshold: </label>
-			<input type="range" id="Threshold" min="0" max="100" value="15"><span id="ThresholdValue">15</span>
+			<label id="str-speechthreshold">Speech Threshold: </label>
+			<input type="range" id="Threshold" min="0" max="100" value="15">
+			<span id="ThresholdValue">15</span>
 		</div>
+
 		<div class="ThresholdContainer">
-			<label id="str-screamthreshold" for="ThresholdScream">Scream Threshold: </label>
-			<input type="range" id="ThresholdScream" min="0" max="100" value="30"> <span id="ThresholdValueScream">30</span>
+			<label id="str-screamthreshold">Scream Threshold: </label>
+			<input type="range" id="ThresholdScream" min="0" max="100" value="30">
+			<span id="ThresholdValueScream">30</span>
 		</div>
 
 		<!--VOICE PREVIEW-->
@@ -99,25 +153,110 @@
 		<div id="VolumeBar">
 			<div id="VolumeLevel"></div>
 		</div>
-	</td>
-	<td class="credits">
+	</div>
+
+	<!-- MIDDLE COLUMN -->
+	<div class="draggableimages settingsview">
+
+	<div class="title">
+		<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-drag-drop"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19 11v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2" /><path d="M13 13l9 3l-4 2l-2 4l-3 -9" /><path d="M3 3l0 .01" /><path d="M7 3l0 .01" /><path d="M11 3l0 .01" /><path d="M15 3l0 .01" /><path d="M3 7l0 .01" /><path d="M3 11l0 .01" /><path d="M3 15l0 .01" /></svg>
+		<h2>Draggable Images</h2>
+	</div>
+
+		<span id="str-avataratcenter">Enable extra images</span>
+		<input type="checkbox" id="toggledraggable" hidden>
+		<label class="custom-checkbox" for="toggledraggable">
+			<span class="checkmark"></span>
+		</label>
+
+		<div class="add-images-section">
+
+				<div class="title">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+						viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+						stroke-linecap="round" stroke-linejoin="round"
+						class="icon icon-tabler icons-tabler-outline icon-tabler-folder">
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" />
+					</svg>
+					<h3>Import Local Files</h3>
+				</div>
+			<div class="import-panel">	
+				<div class="file-input">
+			<label id="importLocalButton" class="customButton">
+<!--<span>Select Image</span>-->
+				<span>Choose file</span>
+				<img id="imagePreview" src="#" alt="Image Preview">
+				<input class="hidden" type="file" id="fileInput" accept="image/*">
+			</label>
+				</div>
+<!--
+				<button class="btn" onclick="loadImportedImages()">Add Local Images</button>
+-->
+			</div>
+				<div class="title">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+						viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+						stroke-linecap="round" stroke-linejoin="round"
+						class="icon icon-tabler icons-tabler-outline icon-tabler-world-www">
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M19.5 7a9 9 0 0 0 -7.5 -4a8.991 8.991 0 0 0 -7.484 4" />
+						<path d="M11.5 3a16.989 16.989 0 0 0 -1.826 4" />
+						<path d="M12.5 3a16.989 16.989 0 0 1 1.828 4" />
+						<path d="M19.5 17a9 9 0 0 1 -7.5 4a8.991 8.991 0 0 1 -7.484 -4" />
+						<path d="M11.5 21a16.989 16.989 0 0 1 -1.826 -4" />
+						<path d="M12.5 21a16.989 16.989 0 0 0 1.828 -4" />
+						<path d="M2 10l1 4l1.5 -4l1.5 4l1 -4" />
+						<path d="M17 10l1 4l1.5 -4l1.5 4l1 -4" />
+						<path d="M9.5 10l1 4l1.5 -4l1.5 4l1 -4" />
+					</svg>
+					<h3>Add Remote Image</h3>
+				</div>
+			<div class="remote-panel">
+				<input type="url" id="remoteUrl" class="remote-input" placeholder="Enter image URL...">
+				<button class="btn" onclick="addRemoteImage()">+</button>
+			</div>
+		</div>
+
+		<hr>
+		<div class="action-buttons">
+			<button class="btn danger" onclick="clearAllImages()">Clear All Images</button>
+			<button class="btn secondary" onclick="exportPositions()">Export Positions</button>
+			<button class="btn secondary" onclick="importPositions()">Import Positions</button>
+		</div>
+
+		<div id="status" class="status"></div>
+	</div>
+
+	<!-- RIGHT COLUMN -->
+	<div class="credits settingsview">
 		<h1>WiPersona</h1>
-		<h3>v1.23</h3>
-		<h3 id="str-zariepsoftware"><a href="https://github.com/Zariep-Software/" target="_blank">Zariep software 2025</a><h3>
-		<h3 id="str-sourcecode"><a href="https://github.com/Zariep-Software/WiPersona" target="_blank">Source code</a><h3>
-		<h3 id="str-onlinemanual"><a href="https://github.com/Zariep-Software/WiPersona/wiki" target="_blank">Online manual</a><h3>
+		<h3>v1.3-beta1</h3>
+		<h3 id="str-credits">
+			<a href="credits.html" target="_blank">Credits</a>
+		</h3>
+		<h3 id="str-sourcecode">
+			<a href="https://github.com/Zariep-Software/WiPersona" target="_blank">Source code</a>
+		</h3>
+		<h3 id="str-onlinemanual">
+			<a href="https://github.com/Zariep-Software/WiPersona/wiki" target="_blank">Online manual</a>
+		</h3>
+
 		<div id="content">
 			<button id="str-saveconfig" onclick="SaveSettings()">Save config</button>
-			<button id="str-restoredefaults" onclick="RestoreSettings()">Restore defaults</button>
+			<pre id="str-configurationsaved" class="hidden">Configuration saved.</pre>
+			<button id="str-restoredefaults" class="btn danger" onclick="RestoreSettings()">Restore defaults</button>
+			<button id="str-showlinktothisconfig" onclick="ShareLink()">Show link to this config</button>
 		</div>
-		<button id="str-showlinktothisconfig"  onclick="ShareLink()">Show link to this config</button>
+
 		<h6 id="LinkToConfig" class="LinkToConfig"></h6>
-	</td>
-	</tr>
-</table>
+	</div>
+
 </div>
+
 		<script type="module" src="main.js"></script>
 		<script src="config.js"></script>
+		<script src="draggableimages.js"></script>
 		<script>SJTSW_TranslatePage();</script> 
 </body>
 </html>

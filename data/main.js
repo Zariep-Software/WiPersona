@@ -82,6 +82,13 @@ function LoadSettings()
 		document.getElementById('effectonscream').checked = effectOnScream;
 		document.getElementById('bgcolor').value = backgroundColor;
 		document.getElementById('showbg').checked = showBackground;
+			if (showBackground)
+			{
+				body.style.backgroundImage = `url(${Background})`;
+				document.body.style.backgroundRepeat = "no-repeat";
+				document.body.style.backgroundSize = "cover";
+				document.body.style.backgroundAttachment = "fixed";
+			}
 		document.getElementById('Threshold').value = speechThreshold;
 		document.getElementById('ThresholdValue').textContent = speechThreshold;
 		document.getElementById('ThresholdScream').value = screamThreshold;
@@ -457,6 +464,7 @@ var isCancelled = false;
 
 async function StartMicrophone(selectedDeviceId)
 {
+	document.getElementById('Status0').classList.remove('hidden');
 	if (Stream)
 	{
 		Stream.getTracks().forEach(track => track.stop());
@@ -645,10 +653,13 @@ async function StartMicrophone(selectedDeviceId)
 	}
 	catch (Error)
 	{
-		//document.getElementById('Status').textContent = 'Permission denied or there was an error. If you are using OBS Studio "Browser", use "--enable-media-stream" flag';
 		document.getElementById('Status1').style.display = 'inline-block';
 		console.error('Error requesting microphone permission:', Error);
 	}
+	setTimeout(function()
+	{
+		document.getElementById('Status0').classList.add('hidden');
+	}, 3000);
 }
 
 function StopMicrophone()
@@ -691,5 +702,79 @@ document.getElementById('ToggleMicrophone').addEventListener('click', async () =
 	{
 		StopMicrophone();
 		MicActive = 0;
+		VoiceStatus.textContent = "Status: Paused";
 	}
 });
+
+// Draggable avatar feature
+const avatar = document.getElementById("Avatar");
+const posXInput = document.getElementById("StrPosX");
+const posYInput = document.getElementById("StrPosY");
+
+let offsetX = 0, offsetY = 0;
+let isDragging = false;
+
+function startDrag(clientX, clientY) {
+	isDragging = true;
+	avatar.classList.add("dragging");
+	offsetX = clientX - avatar.offsetLeft;
+	offsetY = clientY - avatar.offsetTop;
+}
+
+function doDrag(clientX, clientY) {
+	if (!isDragging) return;
+
+	let avatarAtCenter = document.getElementById('togglecenter').checked;
+	if (avatarAtCenter) return;
+
+	let newLeft = clientX - offsetX;
+	let newTop = clientY - offsetY;
+
+	avatar.style.left = `${newLeft}px`;
+	avatar.style.top = `${newTop}px`;
+
+	posXInput.value = Math.round(newLeft);
+	posYInput.value = Math.round(newTop);
+}
+
+function endDrag() {
+	if (isDragging) {
+		isDragging = false;
+		avatar.classList.remove("dragging");
+		document.getElementById('togglemenu').checked = false;
+	}
+}
+
+// Mouse Events
+avatar.addEventListener("mousedown", (e) => startDrag(e.clientX, e.clientY));
+document.addEventListener("mousemove", (e) => doDrag(e.clientX, e.clientY));
+document.addEventListener("mouseup", endDrag);
+
+// Touch Events
+avatar.addEventListener("touchstart", (e) => {
+	const touch = e.touches[0];
+	startDrag(touch.clientX, touch.clientY);
+});
+
+document.addEventListener("touchmove", (e) => {
+	if (!isDragging) return;
+	const touch = e.touches[0];
+	doDrag(touch.clientX, touch.clientY);
+	e.preventDefault(); // prevent scrolling while dragging
+}, { passive: false });
+
+document.addEventListener("touchend", endDrag);
+
+document.addEventListener("keydown", function (event)
+{
+	if (event.key === "Escape")
+	{
+		const toggleMenu = document.getElementById("togglemenu");
+		if (toggleMenu)
+		{
+			toggleMenu.checked = !toggleMenu.checked;
+		}
+	}
+});
+
+
