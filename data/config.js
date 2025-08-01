@@ -60,6 +60,8 @@ function SaveSettings()
 	SaveSetting('EffectOnScream', document.getElementById('effectonscream').checked);
 	SaveSetting('BackgroundColor', document.getElementById('bgcolor').value);
 	SaveSetting('ShowBackground', document.getElementById('showbg').checked);
+	SaveSetting('ToggleDraggable', document.getElementById('toggledraggable').checked);
+	SaveSetting('CurrentWorkspace', document.getElementById('workspace-btn').textContent);
 	const el = document.getElementById('str-configurationsaved');
 		el.classList.remove('hidden');
 		setTimeout(() => {el.classList.add('hidden');}, 3000);
@@ -81,12 +83,25 @@ function RestoreSettings()
 		SaveSetting('EffectOnScream', false);
 		SaveSetting('BackgroundColor', '#000');
 		SaveSetting('ShowBackground', false);
+		SaveSetting('ToggleDraggable', true);
+		SaveSetting('CurrentWorkspace', 'Default');
 		location.reload(true);
 	}
 }
 
-function ShareLink() {
-	const params = new URLSearchParams({
+
+function copyConfigLink()
+{
+	const textarea = document.getElementById("newlink");
+	textarea.select();
+	textarea.setSelectionRange(0, 99999);
+	document.execCommand("copy");
+}
+
+function ShareLink()
+{
+	const params = new URLSearchParams(
+	{
 		AvatarAtCenter: document.getElementById('togglecenter').checked,
 		BackgroundColor: document.getElementById('bgcolor').value.substring(1),
 		ShowBackground: document.getElementById('showbg').checked,
@@ -98,8 +113,13 @@ function ShareLink() {
 		EffectOnScream: document.getElementById('effectonscream').checked,
 		SpeechThreshold: document.getElementById('ThresholdValue').textContent,
 		ScreamThreshold: document.getElementById('ThresholdValueScream').textContent,
-		DesiredMicrophone: document.getElementById('MicrophoneList').value
+		DesiredMicrophone: document.getElementById('MicrophoneList').value,
+		ToggleDraggable: document.getElementById('toggledraggable').value,
+		CurrentWorkspace: document.getElementById('workspace-btn').value
 	});
 	const configLink = `${DomainURL}?${params.toString()}`;
-	document.getElementById("LinkToConfig").innerHTML = `<label for="Link:">Link:</label><br> <textarea id="newlink" name="link" rows="7" cols="25">${configLink}</textarea>`;
+	document.getElementById("LinkToConfig").innerHTML = `<label for="Link:">Link:</label>
+<br> <textarea id="newlink" name="link" rows="7" cols="25">${configLink}</textarea>
+<br><button onclick="copyConfigLink()">Copy to Clipboard</button>
+`;
 }

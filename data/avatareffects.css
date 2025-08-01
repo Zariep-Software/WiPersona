@@ -11,6 +11,26 @@ Effect Section
 	background-position: center;
 	background-repeat: no-repeat;
 	cursor: grab;
+	z-index: 2;
+}
+
+#Avatar:hover {
+	border: 3px solid #28a745;
+	border-radius: 6px;
+}
+
+#avatarmenu {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: 1.5rem;
+	background-color: #00000066;
+	cursor: ns-resize;
+	display: none;
+}
+
+#Avatar:hover #avatarmenu {
+display: block;
 }
 
 

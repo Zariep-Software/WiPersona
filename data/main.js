@@ -49,9 +49,12 @@ var AvatarEffect;
 var AvatarDimEffect;
 var EffectOnScream;
 var ShowBackground;
+var toggleDraggable;
+var CurrentWorkspace;
 var Avatar = document.getElementById('Avatar');
 
 var MicActive;
+var MicInitialized;
 var CurrentMic;
 
 // Load settings from IndexedDB and initialize UI
@@ -69,10 +72,14 @@ function LoadSettings()
 		GetSetting('ShowBackground', false),
 		GetSetting('SpeechThreshold', 15),
 		GetSetting('ScreamThreshold', 30),
-		GetSetting('DesiredMicrophone', 'Default')
-	]).then(([avatarSize, avatarAtCenter, avatarPosX, avatarPosY, avatarEffect, avatarDimEffect, effectOnScream, backgroundColor, showBackground, speechThreshold, screamThreshold, DesiredMicrophone]) =>
+		GetSetting('DesiredMicrophone', 'Default'),
+		GetSetting('ToggleDraggable', 'Default'),
+		GetSetting('CurrentWorkspace', 'Default')
+	]).then(([avatarSize, avatarAtCenter, avatarPosX, avatarPosY, avatarEffect, avatarDimEffect, effectOnScream, backgroundColor, showBackground, speechThreshold, screamThreshold, DesiredMicrophone, toggleDraggable, CurrentWorkspace]) =>
 	{
 		// Update UI elements
+		document.getElementById('workspace-btn').textContent = CurrentWorkspace;
+
 		document.getElementById('togglecenter').checked = avatarAtCenter;
 		document.getElementById('StrAvatarSize').value = avatarSize;
 		document.getElementById('StrPosX').value = avatarPosX;
@@ -82,6 +89,7 @@ function LoadSettings()
 		document.getElementById('effectonscream').checked = effectOnScream;
 		document.getElementById('bgcolor').value = backgroundColor;
 		document.getElementById('showbg').checked = showBackground;
+		document.getElementById('toggledraggable').checked = toggleDraggable;
 			if (showBackground)
 			{
 				body.style.backgroundImage = `url(${Background})`;
@@ -111,6 +119,282 @@ function GetParamValue(Param, DefaultValue)
 {
 	return searchParams.has(Param) ? searchParams.get(Param) : DefaultValue;
 }
+
+const saveFile = async (workspace, fileId, file) =>
+{
+	try
+	{
+		const base64 = await ConvertFileToBase64(file);
+		const key = `${workspace}-${fileId}`;
+		SaveImageToDB(base64, key);
+
+		// Update image preview in UI
+		updatePreview(fileId, base64);
+	}
+	catch (err)
+	{
+		console.error("Error saving file:", err);
+	}
+};
+
+const updatePreview = (fileId, result) =>
+{
+	const previewMap =
+	{
+		'AvatarMuted': 'mutePreview',
+		'AvatarSpeaking': 'talkingPreview',
+		'AvatarScreaming': 'screamingPreview'
+	};
+	const previewId = previewMap[fileId];
+	if (previewId)
+	{
+		const img = document.getElementById(previewId);
+		img.src = result;
+
+		// fallback logic after setting src
+		switch (previewId)
+		{
+			case 'talkingPreview':
+			AvatarSpeak = img.src || LocalAvatarSpeak;
+			img.src = AvatarSpeak;
+			break;
+			case 'mutePreview':
+			AvatarSilence = img.src || LocalAvatarSilence;
+			img.src = AvatarSilence;
+			break;
+			case 'screamingPreview':
+			AvatarScream = img.src || LocalAvatarScream;
+			img.src = AvatarScream;
+			break;
+		}
+	}
+};
+
+const loadImage = async (workspace, fileId, imgElement) =>
+{
+	try
+	{
+		const key = `${workspace}-${fileId}`;
+		const imageData = await GetImageFromDB(key);
+		imgElement.src = imageData || '';
+	}
+	catch (error)
+	{
+		console.error(`Error loading image ${workspace}-${fileId}:`, error);
+	}
+};
+
+const updateImages = async () =>
+{
+	const talkingPreview = document.getElementById('talkingPreview');
+	const mutePreview = document.getElementById('mutePreview');
+	const screamingPreview = document.getElementById('screamingPreview');
+
+	// Helper function to load image and check validity
+	const loadAndValidate = async (workspace, imageName, imgElement, localFallback) =>
+	{
+		await loadImage(workspace, imageName, imgElement);
+
+		// Wait for image to fully load
+		await new Promise((resolve) =>
+		{
+			if (imgElement.complete)
+			{
+				resolve();
+			}
+			else
+			{
+				imgElement.onload = () => resolve();
+				imgElement.onerror = () => resolve();
+			}
+		});
+
+		if (imgElement.naturalWidth === 0)
+		{
+			imgElement.src = localFallback;
+			return localFallback;
+		}
+		return imgElement.src;
+	};
+
+	AvatarSpeak = await loadAndValidate(CurrentWorkspace, 'AvatarSpeaking', talkingPreview, LocalAvatarSpeak);
+	AvatarSilence = await loadAndValidate(CurrentWorkspace, 'AvatarMuted', mutePreview, LocalAvatarSilence);
+	AvatarScream = await loadAndValidate(CurrentWorkspace, 'AvatarScreaming', screamingPreview, LocalAvatarScream);
+};
+
+['AvatarMuted', 'AvatarSpeaking', 'AvatarScreaming'].forEach(id =>
+{
+	const input = document.getElementById(id);
+	const buttonMap =
+	{
+		'AvatarMuted': 'muteButton',
+		'AvatarSpeaking': 'talkingButton',
+		'AvatarScreaming': 'screamingButton'
+	};
+	const btn = document.getElementById(buttonMap[id]);
+
+	input.onchange = () =>
+	{
+		if (input.files[0])
+		{
+			saveFile(CurrentWorkspace, id, input.files[0]);
+		}
+	};
+});
+
+const getAllWorkspaces = async () =>
+{
+	return new Promise((resolve, reject) =>
+	{
+		OpenSettingsDB().then(db =>
+		{
+			const transaction = db.transaction(ASSETS_STORE_NAME, 'readonly');
+			const store = transaction.objectStore(ASSETS_STORE_NAME);
+			const request = store.getAllKeys();
+
+			request.onsuccess = () =>
+			{
+				const keys = request.result;
+				const imageKeys = keys.filter(key => key.includes('-') && ['AvatarMuted', 'AvatarSpeaking', 'AvatarScreaming'].includes(key.split('-')[1]));
+				const workspaces = [...new Set(imageKeys.map(k => k.split('-')[0]))];
+				resolve(workspaces);
+			};
+
+			request.onerror = () => reject(request.error);
+		}).catch(error => reject(error));
+	});
+};
+
+const showOverlay = async () =>
+{
+	try
+	{
+		const workspaces = await getAllWorkspaces();
+		const container = document.getElementById('workspace-container');
+		container.innerHTML = '';
+
+	workspaces.forEach(ws =>
+	{
+		const h2 = document.createElement('h2');
+		h2.textContent = ws;
+
+		const div = document.createElement('div');
+		 div.classList.add('ws-container');
+		const btn = document.createElement('button');
+		btn.className = 'workspace-select-btn';
+
+		['AvatarMuted', 'AvatarSpeaking', 'AvatarScreaming'].forEach(id =>
+		{
+			const container = document.createElement('div');
+			container.classList.add('ws-img');
+			const img = document.createElement('img');
+			loadImage(ws, id, img);
+
+			container.appendChild(img);
+
+			const small = document.createElement('small');
+			small.textContent = id.replace('Avatar', '');
+			container.appendChild(small);
+			btn.appendChild(container);
+		});
+
+		btn.onclick = () =>
+		{
+			CurrentWorkspace = ws;
+			document.getElementById('workspace-btn').textContent = ws;
+			document.getElementById('workspace-overlay').style.display = 'none';
+			updateImages();
+		};
+
+		container.appendChild(h2);
+		div.appendChild(btn);
+
+		if (ws !== 'default')
+		{
+			const delBtn = document.createElement('button');
+			delBtn.textContent = 'Delete';
+			delBtn.onclick = async () =>
+			{
+				// Delete images from 'assets' store
+				OpenDB().then(db =>
+				{
+					const tx = db.transaction(ASSETS_STORE_NAME, 'readwrite');
+					const store = tx.objectStore(ASSETS_STORE_NAME);
+					['AvatarMuted', 'AvatarSpeaking', 'AvatarScreaming'].forEach(id =>
+					{
+						const key = `${ws}-${id}`;
+						store.delete(key);
+					});
+				});
+
+				if (ws === CurrentWorkspace)
+				{
+					CurrentWorkspace = 'default';
+					SaveSetting('CurrentWorkspace', 'default');
+					document.getElementById('workspace-btn').textContent = 'default';
+				}
+
+				showOverlay();
+				updateImages();
+			};
+
+			div.appendChild(delBtn);
+		}
+
+		container.appendChild(div);
+	});
+	}
+	catch (error)
+	{
+		console.error('Error showing overlay:', error);
+	}
+};
+
+function createNewWorkspace()
+{
+	const nameInput = document.getElementById('new-workspace-name');
+	const name = nameInput.value.trim();
+	if (name && name.toLowerCase() !== 'default')
+	{
+		CurrentWorkspace = name;
+		SaveSetting('CurrentWorkspace', name);
+		document.getElementById('workspace-btn').textContent = name;
+		document.getElementById('workspace-overlay').style.display = 'none';
+		updateImages();
+		nameInput.value = '';
+	}
+}
+
+function closeOverlay()
+{
+	document.getElementById('workspace-overlay').style.display = 'none';
+}
+
+window.createNewWorkspace = createNewWorkspace;
+window.closeOverlay = closeOverlay;
+
+window.onload = async () =>
+{
+	try
+	{
+		const saved = await GetSetting('CurrentWorkspace', 'default');
+		CurrentWorkspace = saved || 'default';
+		document.getElementById('workspace-btn').textContent = CurrentWorkspace;
+		updateImages();
+	}
+	catch (error)
+	{
+	console.error('Error loading workspace on startup:', error);
+	CurrentWorkspace = 'default';
+	document.getElementById('workspace-btn').textContent = CurrentWorkspace;
+	}
+};
+
+document.getElementById('workspace-btn').onclick = () =>
+{
+	document.getElementById('workspace-overlay').style.display = 'block';
+	showOverlay();
+};
 
 // Position and size listener
 document.getElementById('StrAvatarSize').addEventListener('change', function(event)
@@ -268,15 +552,19 @@ function LoadAvatarImages()
 {
 	// Load the images from IndexedDB and store them in the variables
 	Promise.all([
+		GetImageFromDB('CurrentWorkspace'),
 		GetImageFromDB('AvatarSpeak'),
 		GetImageFromDB('AvatarSilence'),
 		GetImageFromDB('AvatarScream'),
 		GetImageFromDB('Background')
-	]).then(([speak, silence, scream, background]) =>
+	]).then(([ CurrentWorkspace ,speak, silence, scream, background]) =>
 	{
 		AvatarSpeak = speak || LocalAvatarSpeak;
+			document.getElementById('talkingPreview').src = AvatarSpeak;
 		AvatarSilence = silence || LocalAvatarSilence;
+			document.getElementById('mutePreview').src = AvatarSilence;
 		AvatarScream = scream || LocalAvatarScream;
+			document.getElementById('screamingPreview').src = AvatarScream;
 		Background = background || LocalBackground;
 
 	if (ShowBackground === true)
@@ -292,58 +580,6 @@ function LoadAvatarImages()
 		console.error('Error loading avatar images:', error);
 	});
 }
-
-// Avatar file listeners
-document.getElementById('AvatarMuted').addEventListener('change', function (event)
-{
-	const input = event.target;
-	if (input.files.length > 0)
-	{
-		const file = input.files[0];
-		ConvertFileToBase64(file).then((base64Data) =>
-		{
-			AvatarSilence = base64Data;
-			SaveImageToDB(base64Data, 'AvatarSilence');
-		}).catch((error) =>
-		{
-			console.error('Error converting AvatarMuted file:', error);
-		});
-	}
-});
-
-document.getElementById('AvatarSpeaking').addEventListener('change', function (event)
-{
-	const input = event.target;
-	if (input.files.length > 0)
-	{
-		const file = input.files[0];
-		ConvertFileToBase64(file).then((base64Data) =>
-		{
-			AvatarSpeak = base64Data;
-			SaveImageToDB(base64Data, 'AvatarSpeak');
-		}).catch((error) =>
-		{
-			console.error('Error converting AvatarSpeak file:', error);
-		});
-	}
-});
-
-document.getElementById('AvatarScreaming').addEventListener('change', function (event)
-{
-	const input = event.target;
-	if (input.files.length > 0)
-	{
-		const file = input.files[0];
-		ConvertFileToBase64(file).then((base64Data) =>
-		{
-			AvatarScream = base64Data;
-			SaveImageToDB(base64Data, 'AvatarScream');
-		}).catch((error) =>
-		{
-			console.error('Error converting AvatarScreaming file:', error);
-		});
-	}
-});
 
 // Background image listener
 document.getElementById('SelectBG').addEventListener('change', function (event)
@@ -464,7 +700,11 @@ var isCancelled = false;
 
 async function StartMicrophone(selectedDeviceId)
 {
-	document.getElementById('Status0').classList.remove('hidden');
+	if (!MicInitialized)
+	{
+		document.getElementById('Status0').classList.remove('hidden');
+	}
+
 	if (Stream)
 	{
 		Stream.getTracks().forEach(track => track.stop());
@@ -648,6 +888,7 @@ async function StartMicrophone(selectedDeviceId)
 				void Avatar.offsetWidth;
 				PreviousAvatar = NewAvatar;
 				LastUpdateTime = CurrentTime;
+				MicInitialized = 1;
 			}
 		};
 	}
@@ -655,6 +896,7 @@ async function StartMicrophone(selectedDeviceId)
 	{
 		document.getElementById('Status1').style.display = 'inline-block';
 		console.error('Error requesting microphone permission:', Error);
+		MicInitialized = 0;
 	}
 	setTimeout(function()
 	{
@@ -693,16 +935,68 @@ document.getElementById('RequestMicrophone').addEventListener('click', async () 
 
 document.getElementById('ToggleMicrophone').addEventListener('click', async () =>
 {
-	if (MicActive === 0)
+	if (MicInitialized)
 	{
-		StartMicrophone(CurrentMic);
-		MicActive = 1;
+		if (MicActive === 0)
+		{
+			StartMicrophone(CurrentMic);
+			MicActive = 1;
+		}
+		else
+		{
+			StopMicrophone();
+			MicActive = 0;
+			VoiceStatus.textContent = "Status: Paused";
+		}
+	}
+});
+
+document.addEventListener('DOMContentLoaded', () =>
+{
+	const avatarSizeInput = document.getElementById('StrAvatarSize');
+	const resizeHandle = document.querySelector('#avatarmenu span');
+
+	let resizing = false;
+	let startY = 0;
+	let startSize = 0;
+
+	resizeHandle.addEventListener('mousedown', (e) =>
+	{
+		e.preventDefault();
+		resizing = true;
+		startY = e.clientY;
+		startSize = parseInt(avatarSizeInput.value, 10);
+		document.body.style.userSelect = 'none'; // prevent text selection
+	});
+
+	document.addEventListener('mousemove', (e) =>
+	{
+		if (!resizing) return;
+		const dy = e.clientY - startY;
+		const newSize = Math.max(32, Math.min(9999, startSize + dy * 2)); // Sensitivity factor
+		avatarSizeInput.value = newSize;
+		// Optionally, update Avatar element size here too:
+		document.getElementById('Avatar').style.width = `${newSize}px`;
+		document.getElementById('Avatar').style.height = `${newSize}px`;
+	});
+
+	document.addEventListener('mouseup', () =>
+	{
+		resizing = false;
+		document.body.style.userSelect = '';
+	});
+});
+
+document.getElementById("toggledraggable").addEventListener("change", () =>
+{
+	const canvas = document.getElementById("canvas");
+	if (event.target.checked)
+	{
+		canvas.classList.remove("hidden");
 	}
 	else
 	{
-		StopMicrophone();
-		MicActive = 0;
-		VoiceStatus.textContent = "Status: Paused";
+		canvas.classList.add("hidden");
 	}
 });
 
@@ -714,14 +1008,16 @@ const posYInput = document.getElementById("StrPosY");
 let offsetX = 0, offsetY = 0;
 let isDragging = false;
 
-function startDrag(clientX, clientY) {
+function startDrag(clientX, clientY)
+{
 	isDragging = true;
 	avatar.classList.add("dragging");
 	offsetX = clientX - avatar.offsetLeft;
 	offsetY = clientY - avatar.offsetTop;
 }
 
-function doDrag(clientX, clientY) {
+function doDrag(clientX, clientY)
+{
 	if (!isDragging) return;
 
 	let avatarAtCenter = document.getElementById('togglecenter').checked;
@@ -737,8 +1033,10 @@ function doDrag(clientX, clientY) {
 	posYInput.value = Math.round(newTop);
 }
 
-function endDrag() {
-	if (isDragging) {
+function endDrag()
+{
+	if (isDragging)
+	{
 		isDragging = false;
 		avatar.classList.remove("dragging");
 		document.getElementById('togglemenu').checked = false;
@@ -746,17 +1044,28 @@ function endDrag() {
 }
 
 // Mouse Events
-avatar.addEventListener("mousedown", (e) => startDrag(e.clientX, e.clientY));
+avatar.addEventListener("mousedown", (e) =>
+{
+	if (e.target.closest('#avatarmenu'))
+	{
+		// Clicked inside the menu, don't start dragging
+		return;
+	}
+	startDrag(e.clientX, e.clientY);
+});
+
 document.addEventListener("mousemove", (e) => doDrag(e.clientX, e.clientY));
 document.addEventListener("mouseup", endDrag);
 
 // Touch Events
-avatar.addEventListener("touchstart", (e) => {
+avatar.addEventListener("touchstart", (e) =>
+{
 	const touch = e.touches[0];
 	startDrag(touch.clientX, touch.clientY);
 });
 
-document.addEventListener("touchmove", (e) => {
+document.addEventListener("touchmove", (e) =>
+{
 	if (!isDragging) return;
 	const touch = e.touches[0];
 	doDrag(touch.clientX, touch.clientY);
@@ -769,12 +1078,24 @@ document.addEventListener("keydown", function (event)
 {
 	if (event.key === "Escape")
 	{
-		const toggleMenu = document.getElementById("togglemenu");
-		if (toggleMenu)
+		const overlay = document.getElementById("workspace-overlay");
+		if (window.getComputedStyle(overlay).display == "none")
 		{
-			toggleMenu.checked = !toggleMenu.checked;
+			const toggleMenu = document.getElementById("togglemenu");
+			if (toggleMenu)
+			{
+				toggleMenu.checked = !toggleMenu.checked;
+			}
+		}
+		else
+		{
+			closeOverlay()
 		}
 	}
 });
 
-
+// List app as installable in Chrome?
+if ('serviceWorker' in navigator)
+{
+	navigator.serviceWorker.register('sw.js');
+}

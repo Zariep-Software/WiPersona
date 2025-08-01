@@ -22,7 +22,7 @@ class DraggableImageManager
 	{
 		return new Promise((resolve, reject) =>
 		{
-			const request = indexedDB.open('DraggableImagesDB', 1);
+			const request = indexedDB.open('WiPersonaImages', 1);
 			request.onerror = () => reject(request.error);
 			request.onsuccess = () =>
 			{
@@ -143,6 +143,8 @@ class DraggableImageManager
 
 		this.resizingElement.style.width = newWidth + 'px';
 		this.resizingElement.style.height = newHeight + 'px';
+		document.getElementById('Avatar').classList.add('ghost');
+		document.getElementById('ToggleMicrophone').click();s
 	};
 
 
@@ -164,6 +166,8 @@ class DraggableImageManager
 		{
 			toggleMenu.checked = !toggleMenu.checked;
 		}
+		document.getElementById('Avatar').classList.remove('ghost');
+		document.getElementById('ToggleMicrophone').click();
 	};
 
 
@@ -270,6 +274,8 @@ ${imageData.type === 'remote' ? '- URL: ' + imageData.originalUrl : ''}
 			x: clientX - rect.left,
 			y: clientY - rect.top
 		};
+		document.getElementById('Avatar').classList.add('ghost');
+		document.getElementById('ToggleMicrophone').click();
 	}
 
 	handlePointerMove(clientX, clientY)
@@ -308,6 +314,8 @@ ${imageData.type === 'remote' ? '- URL: ' + imageData.originalUrl : ''}
 		{
 			toggleMenu.checked = !toggleMenu.checked;
 		}
+		document.getElementById('Avatar').classList.remove('ghost');
+		document.getElementById('ToggleMicrophone').click();
 	}
 
 

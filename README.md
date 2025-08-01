@@ -1,6 +1,6 @@
 # WiPersona
 
-**WiPersona is a tool that let you run a simple PNGTuber in a web browser**
+**WiPersona is a lightweight tool that let you run a simple PNGTuber in a web browser**
 
 ### [Try it online!](https://zariep-software.github.io/WiPersona/data/)
 

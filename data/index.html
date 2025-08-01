@@ -3,6 +3,19 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta property="og:site_name" content="WiPersona - PNGTuber on Web Browser" />
+	<meta property="og:title" content="WiPersona - PNGTuber on Web Browser" />
+	<meta property="og:image" content="https://zariep-software.github.io/WiPersona/data/preview.jpg" />
+	<meta property="og:description" content="WiPersona is a lightweight tool that let you run a simple PNGTuber on web browser" />
+	<meta property="og:url" content="https://zariep-software.github.io" />
+	<meta property="og:type" content="website" />
+
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="WiPersona - PNGTuber on Web Browser" />
+	<meta name="twitter:description" content="WiPersona is a lightweight tool that let you run a simple PNGTuber on web browser" />
+	<meta name="twitter:image" content="https://zariep-software.github.io/WiPersona/data/preview.jpg" />
+
 	<title>WiPersona</title>
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="avatareffects.css">
@@ -15,7 +28,11 @@
 	<input type="checkbox" id="togglemenu">
 	<label for="togglemenu">
 	<div id="canvas"></div>
-	<div id="Avatar" title="You can drag me"> </div>
+		<div id="Avatar" title="You can drag me" class="hidden ghost">
+			<div id="avatarmenu">
+				<span>↘</span>
+			</div>
+		</div>
 </label>
 
 <div class="SettingsWindow">
@@ -35,24 +52,28 @@
 			<h2 id="str-avatarsettings">Avatar Settings</h2>
 		</div>
 
+	<div>
 	<span id="str-avatarfolder">Avatar workspace</span>
-		<select id="Workspace">
-		<option value="none">Default</option>
-		</select>
-		<form action="#" method="post" enctype="multipart/form-data">
-			<span id="str-avatarmute">(Mute):</span>
-			<input type="file" id="AvatarMuted" name="imagen" accept="image/*">
-		</form>
+		<button id="workspace-btn">Default</button>
+	</div>
 
-		<form action="#" method="post" enctype="multipart/form-data">
-			<span id="str-avatartalking">(Talking):</span>
-			<input type="file" id="AvatarSpeaking" name="imagen" accept="image/*">
-		</form>
-
-		<form action="#" method="post" enctype="multipart/form-data">
-			<span id="str-avatarscreaming">(Screaming):</span>
-			<input type="file" id="AvatarScreaming" name="imagen" accept="image/*">
-		</form>
+		<div>
+			<label id="muteButton" class="customButton">
+				<img id="mutePreview" src="#" alt="Image Preview">
+				<figcaption>Mute</figcaption>
+				<input class="hidden" type="file" id="AvatarMuted" accept="image/*">
+			</label>
+			<label id="talkingButton" class="customButton">
+				<img id="talkingPreview" src="#" alt="Image Preview">
+				<figcaption>Talk</figcaption>
+				<input class="hidden" type="file" id="AvatarSpeaking" accept="image/*">
+			</label>
+			<label id="screamingButton" class="customButton">
+				<img id="screamingPreview" src="#" alt="Image Preview">
+				<figcaption>Scream</figcaption>
+				<input class="hidden" type="file" id="AvatarScreaming" accept="image/*">
+			</label>
+		</div>
 
 		<span id="str-avataratcenter">Avatar at center:</span>
 		<input type="checkbox" id="togglecenter" hidden>
@@ -186,7 +207,7 @@
 			<label id="importLocalButton" class="customButton">
 <!--<span>Select Image</span>-->
 				<span>Choose file</span>
-				<img id="imagePreview" src="#" alt="Image Preview">
+				<img class="hidden"  id="imagePreview" src="#" alt="Image Preview">
 				<input class="hidden" type="file" id="fileInput" accept="image/*">
 			</label>
 				</div>
@@ -231,7 +252,7 @@
 	<!-- RIGHT COLUMN -->
 	<div class="credits settingsview">
 		<h1>WiPersona</h1>
-		<h3>v1.3-beta1</h3>
+		<h3>v1.3-beta2</h3>
 		<h3 id="str-credits">
 			<a href="credits.html" target="_blank">Credits</a>
 		</h3>
@@ -251,8 +272,19 @@
 
 		<h6 id="LinkToConfig" class="LinkToConfig"></h6>
 	</div>
-
 </div>
+
+	<div class="overlay" id="workspace-overlay">
+		<div class="overlay-content" id="workspace-list">
+			<button class="close-btn" onclick="closeOverlay()">Close</button>
+			<br><br>
+			<div class="ws-entry">
+				<input style="width:90%;" type="text" id="new-workspace-name" placeholder="New workspace name">
+				<button onclick="createNewWorkspace()">Create Workspace</button>
+			</div>
+			<div id="workspace-container"></div>
+		</div>
+	</div>
 
 		<script type="module" src="main.js"></script>
 		<script src="config.js"></script>
