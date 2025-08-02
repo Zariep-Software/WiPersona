@@ -29,19 +29,20 @@
 
 ## Features
 - Choose avatar picture (Mute, Talking, and Screaming)
+- Avatar folders
 - Choose avatar position (or centered)
 - Choose avatar size (px)
 - On-speak avatar animations
 - On-speak dim/bright
 - Choose background color/picture
 - Set speak threshold
-- Persistent settings through cookies
+- Add extra draggable images
+- Persistent settings through IndexedDB
 - Shareable settings with links
 
 ### Installed program features
 
-- Small program size (Less than 1Mb)
-- Automate custom avatar import
+- Small program size
 - Simple launcher (due to browsers security reasons, the most reliable way to run locally is with a local server, WiPersona comes with busybox httpd)
 
 ## How to use

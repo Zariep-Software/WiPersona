@@ -57,28 +57,75 @@ var MicActive;
 var MicInitialized;
 var CurrentMic;
 
+function GetParamValue(Param, DefaultValue)
+{
+	return searchParams.has(Param) ? searchParams.get(Param) : DefaultValue;
+}
+
 // Load settings from IndexedDB and initialize UI
 function LoadSettings()
 {
-	Promise.all([
-		GetSetting('AvatarSize', 512),
-		GetSetting('AvatarAtCenter', true),
-		GetSetting('AvatarPosX', 0),
-		GetSetting('AvatarPosY', 0),
-		GetSetting('AvatarEffect', 'none'),
-		GetSetting('AvatarDimEffect', 'none'),
-		GetSetting('EffectOnScream', false),
-		GetSetting('BackgroundColor', '#000000'),
-		GetSetting('ShowBackground', false),
-		GetSetting('SpeechThreshold', 15),
-		GetSetting('ScreamThreshold', 30),
-		GetSetting('DesiredMicrophone', 'Default'),
-		GetSetting('ToggleDraggable', 'Default'),
-		GetSetting('CurrentWorkspace', 'Default')
-	]).then(([avatarSize, avatarAtCenter, avatarPosX, avatarPosY, avatarEffect, avatarDimEffect, effectOnScream, backgroundColor, showBackground, speechThreshold, screamThreshold, DesiredMicrophone, toggleDraggable, CurrentWorkspace]) =>
+	// If URL has parameters, use them; otherwise use IndexedDB
+	const useUrlParams = !NotParam;
+
+	const settings =
 	{
-		// Update UI elements
+		AvatarSize: GetParamValue('AvatarSize', null),
+		AvatarAtCenter: GetParamValue('AvatarAtCenter', null),
+		AvatarPosX: GetParamValue('AvatarPosX', null),
+		AvatarPosY: GetParamValue('AvatarPosY', null),
+		AvatarEffect: GetParamValue('AvatarEffect', null),
+		AvatarDimEffect: GetParamValue('AvatarDimEffect', null),
+		EffectOnScream: GetParamValue('EffectOnScream', null),
+		BackgroundColor: GetParamValue('BackgroundColor', null),
+		ShowBackground: GetParamValue('ShowBackground', null),
+		SpeechThreshold: GetParamValue('SpeechThreshold', null),
+		ScreamThreshold: GetParamValue('ScreamThreshold', null),
+		DesiredMicrophone: GetParamValue('DesiredMicrophone', null),
+		ToggleDraggable: GetParamValue('ToggleDraggable', null),
+		CurrentWorkspace: GetParamValue('CurrentWorkspace', null)
+	};
+
+	const settingsPromises = Object.entries(settings).map(([key, value]) =>
+	{
+		if (useUrlParams && value !== null)
+		{
+			// Parse booleans and numbers if needed
+			let parsedValue = value;
+			if (value === 'true') parsedValue = true;
+			else if (value === 'false') parsedValue = false;
+			else if (!isNaN(value)) parsedValue = Number(value);
+
+			document.getElementById('str-saveconfig').classList.add('hidden');
+			document.getElementById('str-restoredefaults').classList.add('hidden');
+			return Promise.resolve(parsedValue);
+		}
+		return GetSetting(key, getDefaultValue(key));
+	});
+
+	Promise.all(settingsPromises).then(values =>
+	{
+		const [
+			avatarSize, avatarAtCenter, avatarPosX, avatarPosY, avatarEffect,
+			avatarDimEffect, effectOnScream, backgroundColor, showBackground,
+			speechThreshold, screamThreshold, DesiredMicrophone,
+			toggleDraggable, tempWorkspace
+		] = values;
+
+		CurrentWorkspace = tempWorkspace;
+
 		document.getElementById('workspace-btn').textContent = CurrentWorkspace;
+			try
+			{
+				document.getElementById('workspace-btn').textContent = CurrentWorkspace;
+				updateImages();
+			}
+			catch (error)
+			{
+				console.error('Error loading workspace on startup:', error);
+				CurrentWorkspace = 'default';
+				document.getElementById('workspace-btn').textContent = CurrentWorkspace;
+			}
 
 		document.getElementById('togglecenter').checked = avatarAtCenter;
 		document.getElementById('StrAvatarSize').value = avatarSize;
@@ -90,34 +137,197 @@ function LoadSettings()
 		document.getElementById('bgcolor').value = backgroundColor;
 		document.getElementById('showbg').checked = showBackground;
 		document.getElementById('toggledraggable').checked = toggleDraggable;
-			if (showBackground)
-			{
-				body.style.backgroundImage = `url(${Background})`;
-				document.body.style.backgroundRepeat = "no-repeat";
-				document.body.style.backgroundSize = "cover";
-				document.body.style.backgroundAttachment = "fixed";
-			}
+
+
+		if (showBackground)
+		{
+			body.style.backgroundImage = `url(${Background})`;
+			document.body.style.backgroundRepeat = "no-repeat";
+			document.body.style.backgroundSize = "cover";
+			document.body.style.backgroundAttachment = "fixed";
+		}
+
 		document.getElementById('Threshold').value = speechThreshold;
 		document.getElementById('ThresholdValue').textContent = speechThreshold;
 		document.getElementById('ThresholdScream').value = screamThreshold;
 		document.getElementById('ThresholdValueScream').textContent = screamThreshold;
-		CurrentMic = DesiredMicrophone
-				Avatar.style.width = avatarSize + 'px';
-				Avatar.style.height = avatarSize + 'px';
+		CurrentMic = DesiredMicrophone;
+		Avatar.style.width = avatarSize + 'px';
+		Avatar.style.height = avatarSize + 'px';
 
 		ShowBackground = showBackground;
 		AvatarEffect = avatarEffect;
 		AvatarDimEffect = avatarDimEffect;
-
-		// Apply settings
 		document.body.style.backgroundColor = backgroundColor;
+
 		LoadAvatarPos();
 	}).catch(error => console.error('Error loading settings:', error));
 }
 
-function GetParamValue(Param, DefaultValue)
+function getDefaultValue(key)
 {
-	return searchParams.has(Param) ? searchParams.get(Param) : DefaultValue;
+	const defaults =
+	{
+		AvatarSize: 512,
+		AvatarAtCenter: true,
+		AvatarPosX: 0,
+		AvatarPosY: 0,
+		AvatarEffect: 'none',
+		AvatarDimEffect: 'none',
+		EffectOnScream: false,
+		BackgroundColor: '#000000',
+		ShowBackground: false,
+		SpeechThreshold: 15,
+		ScreamThreshold: 30,
+		DesiredMicrophone: 'Default',
+		ToggleDraggable: 'Default',
+		CurrentWorkspace: 'Default'
+	};
+	return defaults[key];
+}
+
+const DB_NAME = 'WiPersona';
+const ASSETS_STORE_NAME = 'assets';
+const SETTINGS_STORE_NAME = 'settings';
+let db;
+
+function OpenDB()
+{
+	return new Promise((resolve, reject) =>
+	{
+		const request = indexedDB.open(DB_NAME, 1);
+
+		request.onupgradeneeded = function (event)
+		{
+			db = event.target.result;
+
+			if (!db.objectStoreNames.contains(ASSETS_STORE_NAME))
+			{
+				db.createObjectStore(ASSETS_STORE_NAME, { keyPath: 'id' });
+			}
+			if (!db.objectStoreNames.contains(SETTINGS_STORE_NAME))
+			{
+				db.createObjectStore(SETTINGS_STORE_NAME, { keyPath: 'key' });
+			}
+		};
+
+		request.onsuccess = function (event)
+		{
+			db = event.target.result;
+			resolve(db);
+		};
+
+		request.onerror = function (event)
+		{
+			reject(event.target.error);
+		};
+	});
+}
+
+function ConvertFileToBase64(file)
+{
+	return new Promise((resolve, reject) =>
+	{
+		const reader = new FileReader();
+		reader.onloadend = function ()
+		{
+			resolve(reader.result);
+		};
+		reader.onerror = function ()
+		{
+			reject("Error converting file to base64");
+		};
+		reader.readAsDataURL(file);
+	});
+}
+
+function SaveImageToDB(base64Data, key)
+{
+	OpenDB().then((db) =>
+	{
+		const transaction = db.transaction(ASSETS_STORE_NAME, 'readwrite');
+		const store = transaction.objectStore(ASSETS_STORE_NAME);
+
+		store.put({ id: key, data: base64Data });
+
+		transaction.oncomplete = function ()
+		{
+			console.log(`${key} saved successfully`);
+		};
+
+		transaction.onerror = function (event)
+		{
+			console.error('Error saving image:', event.target.error);
+		};
+	}).catch((error) =>
+	{
+		console.error('Error opening DB:', error);
+	});
+}
+
+function GetImageFromDB(key)
+{
+	return new Promise((resolve, reject) =>
+	{
+		OpenDB().then((db) =>
+		{
+			const transaction = db.transaction(ASSETS_STORE_NAME, 'readonly');
+			const store = transaction.objectStore(ASSETS_STORE_NAME);
+
+			const request = store.get(key); // Get the image by key
+
+			request.onsuccess = function (event)
+			{
+				resolve(event.target.result ? event.target.result.data : null); // Return the base64 data
+			};
+
+			request.onerror = function (event)
+			{
+				reject(event.target.error);
+			};
+		}).catch((error) =>
+		{
+			reject('Error opening DB:', error);
+		});
+	});
+}
+
+function LoadAvatarImages()
+{
+	// Load the images from IndexedDB and store them in the variables
+	Promise.all([
+		GetImageFromDB('AvatarSpeak'),
+		GetImageFromDB('AvatarSilence'),
+		GetImageFromDB('AvatarScream'),
+		GetImageFromDB('Background')
+	]).then(([speak, silence, scream, background]) =>
+	{
+		AvatarSpeak = speak || LocalAvatarSpeak;
+			document.getElementById('talkingPreview').src = AvatarSpeak;
+		AvatarSilence = silence || LocalAvatarSilence;
+			document.getElementById('mutePreview').src = AvatarSilence;
+		AvatarScream = scream || LocalAvatarScream;
+			document.getElementById('screamingPreview').src = AvatarScream;
+		Background = background || LocalBackground;
+
+		if (ShowBackground === true)
+		{
+			document.body.style.backgroundImage = `url(${Background})`;
+			document.body.style.backgroundRepeat = "no-repeat";
+			document.body.style.backgroundSize = "cover";
+			document.body.style.backgroundAttachment = "fixed";
+		}
+		if (Background)
+		{
+			document.getElementById('bgImagePreview').src = Background;
+			document.getElementById('bgImagePreview').classList.remove('hidden');
+			document.getElementById('str-choosefile').classList.add('hidden');
+		}
+
+	}).catch((error) =>
+	{
+		console.error('Error loading avatar images:', error);
+	});
 }
 
 const saveFile = async (workspace, fileId, file) =>
@@ -180,7 +390,7 @@ const loadImage = async (workspace, fileId, imgElement) =>
 	}
 	catch (error)
 	{
-		console.error(`Error loading image ${workspace}-${fileId}:`, error);
+		console.log(`Error loading image ${workspace}-${fileId}:`, error);
 	}
 };
 
@@ -217,6 +427,7 @@ const updateImages = async () =>
 		return imgElement.src;
 	};
 
+	console.log(CurrentWorkspace);
 	AvatarSpeak = await loadAndValidate(CurrentWorkspace, 'AvatarSpeaking', talkingPreview, LocalAvatarSpeak);
 	AvatarSilence = await loadAndValidate(CurrentWorkspace, 'AvatarMuted', mutePreview, LocalAvatarSilence);
 	AvatarScream = await loadAndValidate(CurrentWorkspace, 'AvatarScreaming', screamingPreview, LocalAvatarScream);
@@ -279,9 +490,9 @@ const showOverlay = async () =>
 		h2.textContent = ws;
 
 		const div = document.createElement('div');
-		 div.classList.add('ws-container');
+			div.classList.add('ws-container');
 		const btn = document.createElement('button');
-		btn.className = 'workspace-select-btn';
+			btn.className = 'workspace-select-btn';
 
 		['AvatarMuted', 'AvatarSpeaking', 'AvatarScreaming'].forEach(id =>
 		{
@@ -292,9 +503,9 @@ const showOverlay = async () =>
 
 			container.appendChild(img);
 
-			const small = document.createElement('small');
-			small.textContent = id.replace('Avatar', '');
-			container.appendChild(small);
+			//const small = document.createElement('small');
+			//small.textContent = id.replace('Avatar', '');
+			//container.appendChild(small);
 			btn.appendChild(container);
 		});
 
@@ -373,23 +584,6 @@ function closeOverlay()
 window.createNewWorkspace = createNewWorkspace;
 window.closeOverlay = closeOverlay;
 
-window.onload = async () =>
-{
-	try
-	{
-		const saved = await GetSetting('CurrentWorkspace', 'default');
-		CurrentWorkspace = saved || 'default';
-		document.getElementById('workspace-btn').textContent = CurrentWorkspace;
-		updateImages();
-	}
-	catch (error)
-	{
-	console.error('Error loading workspace on startup:', error);
-	CurrentWorkspace = 'default';
-	document.getElementById('workspace-btn').textContent = CurrentWorkspace;
-	}
-};
-
 document.getElementById('workspace-btn').onclick = () =>
 {
 	document.getElementById('workspace-overlay').style.display = 'block';
@@ -434,152 +628,6 @@ document.getElementById('togglecenter').addEventListener('change', function(even
 	LoadAvatarPos();
 });
 LoadAvatarPos();
-
-// Constants for IndexedDB
-const DB_NAME = 'WiPersona';
-const ASSETS_STORE_NAME = 'assets';
-const SETTINGS_STORE_NAME = 'settings';
-let db;
-
-// Open or create the consolidated IndexedDB database
-function OpenDB()
-{
-	return new Promise((resolve, reject) =>
-	{
-		const request = indexedDB.open(DB_NAME, 1);
-
-		request.onupgradeneeded = function (event)
-		{
-			db = event.target.result;
-
-			// Create stores if they doesn't exist
-			if (!db.objectStoreNames.contains(ASSETS_STORE_NAME))
-			{
-				db.createObjectStore(ASSETS_STORE_NAME, { keyPath: 'id' });
-			}
-			if (!db.objectStoreNames.contains(SETTINGS_STORE_NAME))
-			{
-				db.createObjectStore(SETTINGS_STORE_NAME, { keyPath: 'key' });
-			}
-		};
-
-		request.onsuccess = function (event)
-		{
-			db = event.target.result;
-			resolve(db);
-		};
-
-		request.onerror = function (event)
-		{
-			reject(event.target.error);
-		};
-	});
-}
-
-// Convert image file to base64
-function ConvertFileToBase64(file)
-{
-	return new Promise((resolve, reject) =>
-	{
-		const reader = new FileReader();
-		reader.onloadend = function ()
-		{
-			resolve(reader.result);
-		};
-		reader.onerror = function ()
-		{
-			reject("Error converting file to base64");
-		};
-		reader.readAsDataURL(file);
-	});
-}
-
-// Save the base64 image to IndexedDB
-function SaveImageToDB(base64Data, key)
-{
-	OpenDB().then((db) =>
-	{
-		const transaction = db.transaction(ASSETS_STORE_NAME, 'readwrite');
-		const store = transaction.objectStore(ASSETS_STORE_NAME);
-
-		store.put({ id: key, data: base64Data });
-
-		transaction.oncomplete = function ()
-		{
-			console.log(`${key} saved successfully`);
-		};
-
-		transaction.onerror = function (event)
-		{
-			console.error('Error saving image:', event.target.error);
-		};
-	}).catch((error) =>
-	{
-		console.error('Error opening DB:', error);
-	});
-}
-
-// Retrieve a specific image by key from IndexedDB
-function GetImageFromDB(key)
-{
-	return new Promise((resolve, reject) =>
-	{
-		OpenDB().then((db) =>
-		{
-			const transaction = db.transaction(ASSETS_STORE_NAME, 'readonly');
-			const store = transaction.objectStore(ASSETS_STORE_NAME);
-
-			const request = store.get(key); // Get the image by key
-
-			request.onsuccess = function (event)
-			{
-				resolve(event.target.result ? event.target.result.data : null); // Return the base64 data
-			};
-
-			request.onerror = function (event)
-			{
-				reject(event.target.error);
-			};
-		}).catch((error) =>
-		{
-			reject('Error opening DB:', error);
-		});
-	});
-}
-
-// Function to load the images when the web starts
-function LoadAvatarImages()
-{
-	// Load the images from IndexedDB and store them in the variables
-	Promise.all([
-		GetImageFromDB('CurrentWorkspace'),
-		GetImageFromDB('AvatarSpeak'),
-		GetImageFromDB('AvatarSilence'),
-		GetImageFromDB('AvatarScream'),
-		GetImageFromDB('Background')
-	]).then(([ CurrentWorkspace ,speak, silence, scream, background]) =>
-	{
-		AvatarSpeak = speak || LocalAvatarSpeak;
-			document.getElementById('talkingPreview').src = AvatarSpeak;
-		AvatarSilence = silence || LocalAvatarSilence;
-			document.getElementById('mutePreview').src = AvatarSilence;
-		AvatarScream = scream || LocalAvatarScream;
-			document.getElementById('screamingPreview').src = AvatarScream;
-		Background = background || LocalBackground;
-
-	if (ShowBackground === true)
-	{
-		document.body.style.backgroundImage = `url(${Background})`;
-		document.body.style.backgroundRepeat = "no-repeat";
-		document.body.style.backgroundSize = "cover";
-		document.body.style.backgroundAttachment = "fixed";
-	}
-
-	}).catch((error) =>
-	{
-		console.error('Error loading avatar images:', error);
-	});
-}
 
 // Background image listener
 document.getElementById('SelectBG').addEventListener('change', function (event)
@@ -982,9 +1030,52 @@ document.addEventListener('DOMContentLoaded', () =>
 
 	document.addEventListener('mouseup', () =>
 	{
-		resizing = false;
+		if (resizing)
+		{
+			resizing = false;
+			const toggleMenu = document.getElementById("togglemenu");
+			if (toggleMenu)
+			{
+				toggleMenu.checked = !toggleMenu.checked;
+			}
+		}
 		document.body.style.userSelect = '';
 	});
+
+	resizeHandle.addEventListener('touchstart', (e) =>
+	{
+		e.preventDefault();
+		resizing = true;
+		startY = e.touches[0].clientY;
+		startSize = parseInt(avatarSizeInput.value, 10);
+		document.body.style.userSelect = 'none';
+	}, { passive: false });
+
+	document.addEventListener('touchmove', (e) =>
+	{
+		if (!resizing) return;
+		const dy = e.touches[0].clientY - startY;
+		const newSize = Math.max(32, Math.min(9999, startSize + dy * 2));
+		avatarSizeInput.value = newSize;
+		document.getElementById('Avatar').style.width = `${newSize}px`;
+		document.getElementById('Avatar').style.height = `${newSize}px`;
+		e.preventDefault(); // prevent scrolling while resizing
+	}, { passive: false });
+
+	document.addEventListener('touchend', () =>
+	{
+		if (resizing)
+		{
+			resizing = false;
+			const toggleMenu = document.getElementById("togglemenu");
+			if (toggleMenu)
+			{
+				toggleMenu.checked = !toggleMenu.checked;
+			}
+		}
+		document.body.style.userSelect = '';
+	});
+
 });
 
 document.getElementById("toggledraggable").addEventListener("change", () =>
@@ -1062,7 +1153,7 @@ avatar.addEventListener("touchstart", (e) =>
 {
 	const touch = e.touches[0];
 	startDrag(touch.clientX, touch.clientY);
-});
+}, { passive: true });
 
 document.addEventListener("touchmove", (e) =>
 {

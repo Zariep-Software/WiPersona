@@ -93,6 +93,13 @@ td {
 	border-left: var(--border-thick) solid var(--border-primary);
 }
 
+#copylink {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+}
+
 .settingsview {
 	padding: var(--padding-medium);
 }
@@ -145,9 +152,15 @@ textarea {
 	background-color: var(--bg-tertiary);
 	color: var(--text-primary);
 	border-radius: var(--radius-medium);
-	overflow: clip;
+	overflow: auto;
 	border: var(--border-thin) solid var(--border-primary);
 	transition: var(--transition-border);
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+textarea::-webkit-scrollbar {
+	display: none;
 }
 
 .customButton {
@@ -258,13 +271,18 @@ h5 {
 	height: 0;
 	display: none;
 }
+#toggledraggable:not(:checked) ~ .add-images-section {
+	display: none;
+	height: 0;
+}
 
 #togglecenter:checked ~ .ifnotcenter { 
 	display: none;
 	height: 0;
 }
 
-#showbg:checked ~ .ifshowbg { 
+#showbg:checked ~ .ifshowbg,
+label:has(#showbg:checked) ~ .ifshowbg {
 	display: flex;
 }
 
@@ -320,7 +338,7 @@ button:hover {
 }
 
 .hidden {
-	display: none;
+	display: none !important;
 }
 
 .ghost {

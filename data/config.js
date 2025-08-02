@@ -15,8 +15,19 @@ function OpenSettingsDB()
 		request.onupgradeneeded = function (event)
 		{
 			const db = event.target.result;
-			if (!db.objectStoreNames.contains('settings')) {
+			if (!db.objectStoreNames.contains('settings'))
+			{
 				db.createObjectStore('settings', { keyPath: 'key' });
+			}
+			if (!db.objectStoreNames.contains('assets'))
+			{
+				db.createObjectStore('assets', { keyPath: 'id' });
+			}
+			if (!db.objectStoreNames.contains('images'))
+			{
+				const store = db.createObjectStore('images', { keyPath: 'id' });
+				store.createIndex('type', 'type', { unique: false });
+				store.createIndex('timestamp', 'timestamp', { unique: false });
 			}
 		};
 
@@ -89,7 +100,6 @@ function RestoreSettings()
 	}
 }
 
-
 function copyConfigLink()
 {
 	const textarea = document.getElementById("newlink");
@@ -115,11 +125,12 @@ function ShareLink()
 		ScreamThreshold: document.getElementById('ThresholdValueScream').textContent,
 		DesiredMicrophone: document.getElementById('MicrophoneList').value,
 		ToggleDraggable: document.getElementById('toggledraggable').value,
-		CurrentWorkspace: document.getElementById('workspace-btn').value
+		CurrentWorkspace: document.getElementById('workspace-btn').textContent
 	});
 	const configLink = `${DomainURL}?${params.toString()}`;
 	document.getElementById("LinkToConfig").innerHTML = `<label for="Link:">Link:</label>
 <br> <textarea id="newlink" name="link" rows="7" cols="25">${configLink}</textarea>
-<br><button onclick="copyConfigLink()">Copy to Clipboard</button>
+<br><button id="copylink" onclick="copyConfigLink()"> <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-copy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg><text id="str-copytoclipboard" >Copy to Clipboard</text></button>
 `;
+SJTSW_TranslatePage();
 }

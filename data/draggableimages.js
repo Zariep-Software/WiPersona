@@ -11,36 +11,16 @@ class DraggableImageManager
 		this.init();
 	}
 
+	async initDB()
+	{
+		this.db = await OpenSettingsDB();
+	}
+
 	async init()
 	{
 		await this.initDB();
 		this.initEventListeners();
 		await this.loadSavedImages();
-	}
-
-	async initDB()
-	{
-		return new Promise((resolve, reject) =>
-		{
-			const request = indexedDB.open('WiPersonaImages', 1);
-			request.onerror = () => reject(request.error);
-			request.onsuccess = () =>
-			{
-				this.db = request.result;
-				resolve();
-			};
-			
-			request.onupgradeneeded = (event) =>
-			{
-				const db = event.target.result;
-				if (!db.objectStoreNames.contains('images'))
-				{
-					const store = db.createObjectStore('images', { keyPath: 'id' });
-					store.createIndex('type', 'type', { unique: false });
-					store.createIndex('timestamp', 'timestamp', { unique: false });
-				}
-			};
-		});
 	}
 
 	async saveImageToDB(imageData)
@@ -609,7 +589,6 @@ async function exportPositions()
 	});
 }
 
-
 function importPositions()
 {
 	const input = document.getElementById('importInput');
@@ -647,30 +626,31 @@ function importPositions()
 	input.click();
 }
 
-		function setupImagePreview(containerId)
+function setupImagePreview(containerId)
+{
+	const container = document.getElementById(containerId);
+	const fileInput = container.querySelector('input[type="file"]');
+	const imagePreview = container.querySelector('img');
+	const customButtonText = container.querySelector('span');
+
+	fileInput.addEventListener('change', function ()
+	{
+	const file = this.files[0];
+	if (file)
+	{
+		const reader = new FileReader();
+		reader.onload = function (e)
 		{
-			const container = document.getElementById(containerId);
-			const fileInput = container.querySelector('input[type="file"]');
-			const imagePreview = container.querySelector('img');
-			const customButtonText = container.querySelector('span');
-
-			fileInput.addEventListener('change', function ()
-			{
-			const file = this.files[0];
-			if (file)
-			{
-				const reader = new FileReader();
-				reader.onload = function (e)
-				{
-					imagePreview.src = e.target.result;
-					imagePreview.style.display = 'block';
-					customButtonText.style.display = 'none';
-				}
-				reader.readAsDataURL(file);
-				loadImportedImages();
-			}
-			});
+			imagePreview.src = e.target.result;
+			imagePreview.style.display = 'block';
+			customButtonText.style.display = 'none';
 		}
+		reader.readAsDataURL(file);
+		loadImportedImages();
+	}
+	});
+}
 
-		// Initialize the image preview functionality
-		setupImagePreview('importLocalButton');
+// Initialize the image preview functionality
+setupImagePreview('importLocalButton');
+setupImagePreview('selectBGButton');
